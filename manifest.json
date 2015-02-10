@@ -6,9 +6,9 @@
         "fr": "Stockage Cloud Open Source"
     },
     "developer": {
-        "name": "ElieSauveterre",
-        "email": "contact@mikangali.om",
-        "url": "http://www.mikangali.com/"
+        "name": "",
+        "email": "",
+        "url": ""
     },
     "multi_instance": "false",
     "arguments": {
@@ -16,14 +16,16 @@
             {
                 "name": "domain",
                 "ask": {
-                    "en": "Choose a domain for Seafile"
+                    "en": "Choose a domain for Seafile",
+                    "fr": "Choisissez un domaine pour Seafile"
                 },
                 "example": "domain.org"
             },
             {
                 "name": "path",
                 "ask": {
-                    "en": "Choose a path for Seafile"
+                    "en": "Choose a path for Seafile",
+                    "fr": "Choisissez un chemin pour Seafile"
                 },
                 "example": "/seafile",
                 "default": "/seafile"
@@ -31,24 +33,11 @@
             {
                 "name": "server_name",
                 "ask": {
-                    "en": "Choose a name"
+                    "en": "Choose a name",
+                    "fr": "Choisissez un nom"
                 },
                 "example": "Seafile",
                 "default": "Seafile"
-            },
-            {
-                "name": "admin_email",
-                "ask": {
-                    "en": "Enter an email for the administrator"
-                },
-                "example": "homer@domain.com"
-            },
-            {
-                "name": "admin_password",
-                "ask": {
-                    "en": "Enter a password for the administrator"
-                },
-                "example": "**Sup3rS3cr3t**"
             },
             {
                 "name": "public_site",

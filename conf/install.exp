@@ -1,0 +1,62 @@
+#!/usr/bin/expect
+set timeout 10
+
+set server_name [lindex $argv 0]
+set domain [lindex $argv 1]
+set ccnet_port [lindex $argv 2]
+set seafile_data [lindex $argv 3]
+set seafile_port [lindex $argv 4]
+set fileserver_port [lindex $argv 5]
+set db_pwd [lindex $argv 6]
+
+spawn /var/www/seafile/seafile-server-4.0.6/setup-seafile-mysql.sh
+
+expect "Press ENTER to continue"
+send "\r";
+
+expect "What is the name of the server? It will be displayed on the client."
+send "$server_name\r";
+
+expect "What is the ip or domain of the server?"
+send "$domain\r";
+
+expect "Which port do you want to use for the ccnet server?"
+send "$ccnet_port\r";
+
+expect "Where do you want to put your seafile data?"
+send "$seafile_data\r";
+
+expect "Which port do you want to use for the seafile server?"
+send "$seafile_port\r";
+
+expect "Which port do you want to use for the seafile fileserver?"
+send "$fileserver_port\r";
+
+expect "Use existing ccnet/seafile/seahub databases"
+send "2\r";
+
+expect "What is the host of mysql server?"
+send "localhost\r";
+
+expect "What is the port of mysql server?"
+send "3306\r";
+
+expect "Which mysql user to use for seafile?"
+send "seafile\r";
+
+expect "What is the password for mysql user"
+send "$db_pwd\r";
+
+expect "Enter the existing database name for ccnet:"
+send "ccnetdb\r";
+
+expect "Enter the existing database name for seafile:"
+send "seafiledb\r";
+
+expect "Enter the existing database name for seahub:"
+send "seahubdb\r";
+
+expect "Press ENTER to continue, or Ctrl-C to abort"
+send "\r";
+
+interact

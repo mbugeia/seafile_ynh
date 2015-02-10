@@ -1,19 +1,23 @@
 #!/bin/bash
 domain=$(sudo yunohost app setting seafile domain)
+root_pwd=$(sudo cat /etc/yunohost/mysql)
 
-cd /var/www/seafile/seafile-server-*
-sudo ./seafile.sh stop
-sudo ./seahub.sh stop
+sudo service seafile-server stop
 
 sudo rm -rf /var/www/seafile
 sudo rm -f /etc/nginx/conf.d/$domain.d/seafile.conf
 sudo rm -f /etc/init.d/seafile-server
-sudo rm -f /etc/init/seafile-server.conf
+sudo rm -rf /home/yunohost.app/seafile-data
+
+# Remove databases
+mysql -u root -p$root_pwd -e "DROP DATABASE ccnetdb ; DROP DATABASE seafiledb ; DROP DATABASE seahubdb ; DROP USER seafile@localhost ;"
 
 ccnet_port=$(sudo yunohost app setting seafile ccnet_port)
 seafile_port=$(sudo yunohost app setting seafile seafile_port)
-seahub_port=$(sudo yunohost app setting seafile seahub_port)
 
 sudo yunohost firewall disallow $ccnet_port
 sudo yunohost firewall disallow $seafile_port
-sudo yunohost firewall disallow $seahub_port
+
+# Restart services
+sudo service nginx reload
+sudo yunohost app ssowatconf

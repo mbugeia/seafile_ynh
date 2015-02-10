@@ -1,18 +1,19 @@
 #!/bin/sh
-### BEGIN INIT INFO
-# Provides: seafile-server
-# Should-Start: seafile-server
-# Required-Start: $all
-# Required-Stop:
-# Default-Start: 2 3 4 5
-# Default-Stop: 0 1 6
-# Short-Description: start seafile-server at boot time
-### END INIT INFO
-#
-# Change the value of "user" to your linux user name
-user=root
 
-# Change the value of "seafile_dir" to your path of seafile installation
+### BEGIN INIT INFO
+# Provides:          seafile-server
+# Required-Start:    $local_fs $remote_fs $network mysql
+# Required-Stop:     $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts Seafile Server
+# Description:       starts Seafile Server
+### END INIT INFO
+
+# Change the value of "user" to your linux user name
+user=www-data
+
+# Change the value of "script_path" to your path of seafile installation
 seafile_dir=SEAFILE_DIR
 script_path=${seafile_dir}/seafile-server-latest
 seafile_init_log=${seafile_dir}/logs/seafile.init.log
