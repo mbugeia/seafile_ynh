@@ -40,6 +40,22 @@
                 "default": "Seafile"
             },
             {
+                "name": "admin",
+                "ask": {
+                    "en": "Choose the admin user for Seafile",
+                    "fr": "Choisissez l'administrateur de Seafile"
+                },
+                "example": "johndoe"
+            },
+            {
+                "name": "admin_password",
+                "ask": {
+                    "en": "Enter a password for the administrator",
+                    "fr": "Entrez un mot de passe pour l'administrateur"
+                },
+                "example": "**Sup3rS3cr3t**"
+            },
+            {
                 "name": "public_site",
                 "ask": {
                     "en": "Is it a public site ? If you want to use a desktop client or the smartphone app, make Seafile public.",

@@ -2,7 +2,9 @@
 domain=$1
 path=$2
 server_name=$3
-is_public=$4
+admin=$4
+admin_password=$5
+is_public=$6
 final_path=/var/www/seafile
 seafile_data=/home/yunohost.app/seafile-data
 seafile_version=4.0.6
@@ -44,9 +46,6 @@ sudo tar xzf ../sources/'seafile-server_'$seafile_version'_x86-64.tar'
 sudo mv seafile-server-$seafile_version/* $final_path/seafile-server-$seafile_version
 sudo mv ../sources/'seafile-server_'$seafile_version'_x86-64.tar' $final_path/installed
 
-# Set permissions to seafile directory
-sudo chown -R www-data: $final_path
-
 # Find available ports
 findPort 10001
 ccnet_port=$port
@@ -72,16 +71,17 @@ sudo yunohost app initdb -d seafiledb -p $db_pwd $db_user
 sudo yunohost app initdb -d seahubdb -p $db_pwd $db_user 
 
 # Run install script
-sudo cp ../conf/install.exp $final_path/seafile-server-$seafile_version
-sudo chmod +x $final_path/seafile-server-$seafile_version/install.exp
+sudo chmod +x ../conf/install.exp
 sudo chmod +x $final_path/seafile-server-$seafile_version/setup-seafile-mysql.sh
-sudo $final_path/seafile-server-$seafile_version/install.exp $server_name $domain $ccnet_port $seafile_data $seafile_port $fileserver_port $db_pwd
+sudo ../conf/install.exp $server_name $domain $ccnet_port $seafile_data $seafile_port $fileserver_port $db_pwd
 
 # Update seafile config
 sudo sed -i "s@http://@https://@g" $final_path/ccnet/ccnet.conf
 sudo sed -i "s@:8000@$path@g" $final_path/ccnet/ccnet.conf
 echo 'FILE_SERVER_ROOT = "https://'$domain'/seafhttp"' | sudo tee -a $final_path/seahub_settings.py
 echo 'SITE_ROOT = "'$path'/"' | sudo tee -a $final_path/seahub_settings.py
+echo 'SERVE_STATIC = False' | sudo tee -a $final_path/seahub_settings.py
+echo 'MEDIA_URL = "'$path'/media/"' | sudo tee -a $final_path/seahub_settings.py
 
 # LDAP configuration
 echo '[LDAP]' | sudo tee -a $final_path/ccnet/ccnet.conf
@@ -103,9 +103,15 @@ sed -i "s@SEAHUB_PORT@$seahub_port@g" ../conf/nginx.conf
 sed -i "s@SEAFILE_FILESERVER_PORT@$fileserver_port@g" ../conf/nginx.conf
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/seafile.conf
 
+# Set permissions to seafile directory
+sudo chown -R www-data:www-data $final_path
+sudo chown -R www-data:www-data $seafile_data
+
 # Open port
 sudo yunohost firewall allow $ccnet_port
 sudo yunohost firewall allow $seafile_port
+
+sudo yunohost app setting seafile skipped_uris -v "/media"
 
 if [ "$is_public" = "No" ];
 then
@@ -115,9 +121,14 @@ else
 	sudo yunohost app setting seafile skipped_uris -v "/"
 fi
 
+# Start seafile, seahub and populate admin account
+sudo /var/www/seafile/seafile-server-4.0.6/seafile.sh start
+sudo chmod +x ../conf/first_launch.exp
+sudo ../conf/first_launch.exp $admin_email $admin_password
+
+# register yunohost service
+sudo yunohost service add seafile-server
+
 # Reload Nginx and regenerate SSOwat conf
 sudo service nginx reload
 sudo yunohost app ssowatconf
-
-# Start Seafile Server
-sudo service seafile-server start

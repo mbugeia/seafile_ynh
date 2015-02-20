@@ -1,0 +1,18 @@
+#!/usr/bin/expect
+set timeout 10
+
+set admin_email [lindex $argv 0]
+set admin_password [lindex $argv 1]
+
+spawn /var/www/seafile/seafile-server-4.0.6/seahub.sh start
+
+expect "for the admin account?"
+send "$admin_email\r";
+
+expect "for the admin account?"
+send "$admin_password\r";
+
+expect "Enter the"
+send "$admin_password\r";
+
+interact
