@@ -103,6 +103,10 @@ sed -i "s@SEAHUB_PORT@$seahub_port@g" ../conf/nginx.conf
 sed -i "s@SEAFILE_FILESERVER_PORT@$fileserver_port@g" ../conf/nginx.conf
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/seafile.conf
 
+# Copy first launch script
+sudo cp ../conf/first_launch.exp $final_path
+sudo chmod +x $final_path/first_launch.exp
+
 # Set permissions to seafile directory
 sudo chown -R www-data:www-data $final_path
 sudo chown -R www-data:www-data $seafile_data
@@ -111,20 +115,20 @@ sudo chown -R www-data:www-data $seafile_data
 sudo yunohost firewall allow $ccnet_port
 sudo yunohost firewall allow $seafile_port
 
-sudo yunohost app setting seafile skipped_uris -v "/media"
+# Start seafile, seahub and populate admin account
+sudo su - www-data -c "/var/www/seafile/seafile-server-4.0.6/seafile.sh start"
+sudo su - www-data -c "$final_path/first_launch.exp $admin_email $admin_password"
+
+#sudo yunohost app setting seafile skipped_urls -v "/media"
+#sudo yunohost app setting seafile unprotected_urls -v "/"
 
 if [ "$is_public" = "No" ];
 then
-	sudo yunohost app setting seafile skipped_uris -d
-	sudo yunohost app ssowatconf
+	#sudo yunohost app setting seafile unprotected_urls -d
+	#sudo yunohost app ssowatconf
 else
-	sudo yunohost app setting seafile skipped_uris -v "/"
+	#sudo yunohost app setting seafile unprotected_urls -v "/"
 fi
-
-# Start seafile, seahub and populate admin account
-sudo /var/www/seafile/seafile-server-4.0.6/seafile.sh start
-sudo chmod +x ../conf/first_launch.exp
-sudo ../conf/first_launch.exp $admin_email $admin_password
 
 # register yunohost service
 sudo yunohost service add seafile-server
