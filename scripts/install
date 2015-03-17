@@ -124,9 +124,9 @@ sudo su - www-data -c "$final_path/first_launch.exp $admin_email $admin_password
 
 if [ "$is_public" = "No" ]
 then
-	sudo yunohost app setting seafile unprotected_urls -d
+	sudo yunohost app setting seafile unprotected_uris -d
 else
-	sudo yunohost app setting seafile unprotected_urls -v "/"
+	sudo yunohost app setting seafile unprotected_uris -v "/"
 fi
 
 # register yunohost service
