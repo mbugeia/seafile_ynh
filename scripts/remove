@@ -18,6 +18,8 @@ seafile_port=$(sudo yunohost app setting seafile seafile_port)
 sudo yunohost firewall disallow $ccnet_port
 sudo yunohost firewall disallow $seafile_port
 
+sudo yunohost service remove seafile-server
+
 # Restart services
 sudo service nginx reload
 sudo yunohost app ssowatconf

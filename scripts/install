@@ -1,3 +1,4 @@
+#!/bin/bash
 # Retrieve arguments
 domain=$1
 path=$2
@@ -14,7 +15,6 @@ admin_email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
 
 port=''
 findPort () {
-
     port=$1
 
     sudo yunohost app checkport $port
@@ -122,12 +122,11 @@ sudo su - www-data -c "$final_path/first_launch.exp $admin_email $admin_password
 #sudo yunohost app setting seafile skipped_urls -v "/media"
 #sudo yunohost app setting seafile unprotected_urls -v "/"
 
-if [ "$is_public" = "No" ];
+if [ "$is_public" = "No" ]
 then
-	#sudo yunohost app setting seafile unprotected_urls -d
-	#sudo yunohost app ssowatconf
+	sudo yunohost app setting seafile unprotected_urls -d
 else
-	#sudo yunohost app setting seafile unprotected_urls -v "/"
+	sudo yunohost app setting seafile unprotected_urls -v "/"
 fi
 
 # register yunohost service
