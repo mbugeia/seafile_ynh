@@ -6,6 +6,7 @@ server_name=$3
 admin=$4
 admin_password=$5
 is_public=$6
+architecture=$7
 final_path=/var/www/seafile
 seafile_data=/home/yunohost.app/seafile-data
 seafile_version=4.0.6
@@ -42,9 +43,9 @@ sudo mkdir -p $final_path/installed
 sudo mkdir -p $final_path/logs
 sudo mkdir -p $final_path/seafile-data
 sudo mkdir -p $final_path/seafile-server-$seafile_version
-sudo tar xzf ../sources/'seafile-server_'$seafile_version'_x86-64.tar'
+sudo tar xzf ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar'
 sudo mv seafile-server-$seafile_version/* $final_path/seafile-server-$seafile_version
-sudo mv ../sources/'seafile-server_'$seafile_version'_x86-64.tar' $final_path/installed
+sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar' $final_path/installed
 
 # Find available ports
 findPort 10001
@@ -82,6 +83,15 @@ echo 'FILE_SERVER_ROOT = "https://'$domain'/seafhttp"' | sudo tee -a $final_path
 echo 'SITE_ROOT = "'$path'/"' | sudo tee -a $final_path/seahub_settings.py
 echo 'SERVE_STATIC = False' | sudo tee -a $final_path/seahub_settings.py
 echo 'MEDIA_URL = "'$path'/media/"' | sudo tee -a $final_path/seahub_settings.py
+
+# Email configuration
+echo 'EMAIL_USE_TLS = False' | sudo tee -a $final_path/seahub_settings.py
+echo 'EMAIL_HOST = "localhost"' | sudo tee -a $final_path/seahub_settings.py
+echo 'EMAIL_HOST_USER = "seafile@'$domain'"' | sudo tee -a $final_path/seahub_settings.py
+echo 'EMAIL_HOST_PASSWORD = ""' | sudo tee -a $final_path/seahub_settings.py
+echo 'EMAIL_PORT = "25"' | sudo tee -a $final_path/seahub_settings.py
+echo 'DEFAULT_FROM_EMAIL = "seafile@'$domain'"' | sudo tee -a $final_path/seahub_settings.py
+echo 'SERVER_EMAIL = "seafile@'$domain'"' | sudo tee -a $final_path/seahub_settings.py
 
 # LDAP configuration
 echo '[LDAP]' | sudo tee -a $final_path/ccnet/ccnet.conf

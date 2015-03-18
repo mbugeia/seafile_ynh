@@ -63,6 +63,15 @@
                 },
                 "choices": ["Yes", "No"],
                 "default": "Yes"
+            },
+            {
+                "name": "architecture",
+                "ask": {
+                    "en": "What is the server architecture?",
+                    "fr": "Quelle est l'architecture du serveur ?"
+                },
+                "choices": ["x86-64", "i386", "arm"],
+                "default": "x86-64"
             }
         ]
     }
