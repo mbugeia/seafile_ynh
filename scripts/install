@@ -129,8 +129,11 @@ sudo yunohost firewall allow $seafile_port
 sudo su - www-data -c "/var/www/seafile/seafile-server-4.0.6/seafile.sh start"
 sudo su - www-data -c "$final_path/first_launch.exp $admin_email $admin_password"
 
-#sudo yunohost app setting seafile skipped_urls -v "/media"
-#sudo yunohost app setting seafile unprotected_urls -v "/"
+# add sso config to unprotect domain.tld/seafhttp in /etc/ssowat/conf.json.persistent
+sudo python ../conf/add_sso_config.py
+
+# unprotect media
+sudo yunohost app setting seafile unprotected_uris -v "/media"
 
 if [ "$is_public" = "No" ]
 then

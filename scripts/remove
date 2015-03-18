@@ -20,6 +20,9 @@ sudo yunohost firewall disallow $seafile_port
 
 sudo yunohost service remove seafile-server
 
+# remove sso config to unprotect domain.tld/seafhttp in /etc/ssowat/conf.json.persistent
+sudo python ../conf/remove_sso_config.py
+
 # Restart services
 sudo service nginx reload
 sudo yunohost app ssowatconf
