@@ -15,7 +15,7 @@ Installation
 
 From command line:
 
-`sudo yunohost app install -l Seafile -u https://github.com/mbugeia/seafile_ynh seafile`
+`sudo yunohost app install -l Seafile https://github.com/mbugeia/seafile_ynh`
 
 Upgrade
 -------
