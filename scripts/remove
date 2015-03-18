@@ -4,6 +4,9 @@ root_pwd=$(sudo cat /etc/yunohost/mysql)
 
 sudo service seafile-server stop
 
+# remove sso config to unprotect domain.tld/seafhttp in /etc/ssowat/conf.json.persistent
+sudo python /var/www/seafile/remove_sso_conf.py
+
 sudo rm -rf /var/www/seafile
 sudo rm -f /etc/nginx/conf.d/$domain.d/seafile.conf
 sudo rm -f /etc/init.d/seafile-server
@@ -19,9 +22,6 @@ sudo yunohost firewall disallow $ccnet_port
 sudo yunohost firewall disallow $seafile_port
 
 sudo yunohost service remove seafile-server
-
-# remove sso config to unprotect domain.tld/seafhttp in /etc/ssowat/conf.json.persistent
-sudo python ../conf/remove_sso_config.py
 
 # Restart services
 sudo service nginx reload

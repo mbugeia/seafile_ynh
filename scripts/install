@@ -130,7 +130,9 @@ sudo su - www-data -c "/var/www/seafile/seafile-server-4.0.6/seafile.sh start"
 sudo su - www-data -c "$final_path/first_launch.exp $admin_email $admin_password"
 
 # add sso config to unprotect domain.tld/seafhttp in /etc/ssowat/conf.json.persistent
-sudo python ../conf/add_sso_config.py
+sudo cp ../conf/add_sso_conf.py $final_path
+sudo cp ../conf/remove_sso_conf.py $final_path
+sudo python $final_path/add_sso_conf.py
 
 # unprotect media
 sudo yunohost app setting seafile unprotected_uris -v "/media"
