@@ -63,13 +63,16 @@ sudo yunohost app setting seafile seafile_port -v $seafile_port
 sudo yunohost app setting seafile seahub_port -v $seahub_port
 sudo yunohost app setting seafile fileserver_port -v $fileserver_port
 sudo yunohost app setting seafile is_public -v $is_public
+sudo yunohost app setting seafile architecture -v $architecture
+sudo yunohost app setting seafile installed_version -v $seafile_version
 
 # init databases
 db_user=seafile
 db_pwd=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
 sudo yunohost app initdb -d ccnetdb -p $db_pwd $db_user 
 sudo yunohost app initdb -d seafiledb -p $db_pwd $db_user 
-sudo yunohost app initdb -d seahubdb -p $db_pwd $db_user 
+sudo yunohost app initdb -d seahubdb -p $db_pwd $db_user
+sudo yunohost app setting seafile db_pwd -v $db_pwd
 
 # Run install script
 sudo chmod +x ../conf/install.exp
