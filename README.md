@@ -20,7 +20,11 @@ From command line:
 Upgrade
 -------
 
-Not yet available
+From command line:
+
+`sudo yunohost app upgrade -l Seafile https://github.com/mbugeia/seafile_ynh seafile`
+
+This will install Seafile v4.1.1 with HTTPS Sync only. /!\Not available on ARM for now /!\
 
 Infos
 -----

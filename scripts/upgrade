@@ -1,0 +1,48 @@
+#!/bin/bash
+app=seafile
+
+# Retrieve settings
+installed_version=$(sudo yunohost app setting $app installed_version)
+architecture=$(sudo yunohost app setting $app architecture)
+root_pwd=$(sudo cat /etc/yunohost/mysql)
+seafile_version=4.1.1
+final_path=/var/www/$app
+
+# extract new version
+sudo mkdir -p $final_path/seafile-server-$seafile_version
+sudo tar xzf ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar'
+sudo mv seafile-server-$seafile_version/* $final_path/seafile-server-$seafile_version
+sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar' $final_path/installed
+
+# stop seafile server
+sudo service seafile-server stop
+
+# permission to execute update script and expect helper
+sudo chmod +x ../conf/upgrade_4.1.1.exp
+sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.0_4.1.sh
+
+# do the upgrade
+sudo ../conf/upgrade_4.1.1.exp $root_pwd
+
+# restore correct permissions
+sudo chown -R www-data:www-data $final_path
+
+# disallow port that was used by old seafile client
+ccnet_port=$(sudo yunohost app setting $app ccnet_port)
+seafile_port=$(sudo yunohost app setting $app seafile_port)
+sudo yunohost firewall disallow $ccnet_port
+sudo yunohost firewall disallow $seafile_port
+
+# restart seafile server
+sudo service seafile-server start
+
+# remove old version files
+sudo rm -f $final_path/installed/seafile-server_$installed_version_$architecture.tar
+sudo rm -f $final_path/seafile-server_$installed_version_$architecture
+
+# store new installed version
+sudo yunohost app setting seafile installed_version -v $seafile_version
+
+# Reload Nginx and regenerate SSOwat conf
+sudo service nginx reload
+sudo yunohost app ssowatconf
