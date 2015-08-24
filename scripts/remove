@@ -15,12 +15,6 @@ sudo rm -rf /home/yunohost.app/seafile-data
 # Remove databases
 mysql -u root -p$root_pwd -e "DROP DATABASE ccnetdb ; DROP DATABASE seafiledb ; DROP DATABASE seahubdb ; DROP USER seafile@localhost ;"
 
-ccnet_port=$(sudo yunohost app setting seafile ccnet_port)
-seafile_port=$(sudo yunohost app setting seafile seafile_port)
-
-sudo yunohost firewall disallow $ccnet_port
-sudo yunohost firewall disallow $seafile_port
-
 sudo yunohost service remove seafile-server
 
 # Restart services

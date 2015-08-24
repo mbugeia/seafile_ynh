@@ -9,7 +9,7 @@ is_public=$6
 architecture=$7
 final_path=/var/www/seafile
 seafile_data=/home/yunohost.app/seafile-data
-seafile_version=4.0.6
+seafile_version=4.3.1
 
 # Retrieve admin email
 admin_email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
@@ -48,20 +48,17 @@ sudo mv seafile-server-$seafile_version/* $final_path/seafile-server-$seafile_ve
 sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar' $final_path/installed
 
 # Find available ports
-findPort 10001
-ccnet_port=$port
-findPort 12001
-seafile_port=$port
 findPort 8000
 seahub_port=$port
 findPort 8082
 fileserver_port=$port
+findPort 8080
+webdav_port=$port
 
 # store config in yunohost
-sudo yunohost app setting seafile ccnet_port -v $ccnet_port
-sudo yunohost app setting seafile seafile_port -v $seafile_port
 sudo yunohost app setting seafile seahub_port -v $seahub_port
 sudo yunohost app setting seafile fileserver_port -v $fileserver_port
+sudo yunohost app setting seafile fileserver_port -v $webdav_port
 sudo yunohost app setting seafile is_public -v $is_public
 sudo yunohost app setting seafile architecture -v $architecture
 sudo yunohost app setting seafile installed_version -v $seafile_version
@@ -77,7 +74,7 @@ sudo yunohost app setting seafile db_pwd -v $db_pwd
 # Run install script
 sudo chmod +x ../conf/install.exp
 sudo chmod +x $final_path/seafile-server-$seafile_version/setup-seafile-mysql.sh
-sudo ../conf/install.exp $server_name $domain $ccnet_port $seafile_data $seafile_port $fileserver_port $db_pwd
+sudo ../conf/install.exp $server_name $domain $seafile_data $fileserver_port $db_pwd
 
 # Update seafile config
 sudo sed -i "s@http://@https://@g" $final_path/ccnet/ccnet.conf
@@ -86,6 +83,8 @@ echo 'FILE_SERVER_ROOT = "https://'$domain'/seafhttp"' | sudo tee -a $final_path
 echo 'SITE_ROOT = "'$path'/"' | sudo tee -a $final_path/seahub_settings.py
 echo 'SERVE_STATIC = False' | sudo tee -a $final_path/seahub_settings.py
 echo 'MEDIA_URL = "'$path'/media/"' | sudo tee -a $final_path/seahub_settings.py
+echo 'COMPRESS_URL = MEDIA_URL' | sudo tee -a $final_path/seahub_settings.py
+echo "STATIC_URL = MEDIA_URL + 'assets/'" | sudo tee -a $final_path/seahub_settings.py
 
 # Email configuration
 echo 'EMAIL_USE_TLS = False' | sudo tee -a $final_path/seahub_settings.py
@@ -114,6 +113,7 @@ sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
 sed -i "s@ALIASTOCHANGE@$final_path/@g" ../conf/nginx.conf
 sed -i "s@SEAHUB_PORT@$seahub_port@g" ../conf/nginx.conf
 sed -i "s@SEAFILE_FILESERVER_PORT@$fileserver_port@g" ../conf/nginx.conf
+sed -i "s@WEBDAV_PORT@$webdav_port@g" ../conf/nginx.conf
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/seafile.conf
 
 # Copy first launch script
@@ -124,15 +124,11 @@ sudo chmod +x $final_path/first_launch.exp
 sudo chown -R www-data:www-data $final_path
 sudo chown -R www-data:www-data $seafile_data
 
-# Open port
-sudo yunohost firewall allow $ccnet_port
-sudo yunohost firewall allow $seafile_port
-
 # Start seafile, seahub and populate admin account
-sudo su - www-data -c "/var/www/seafile/seafile-server-4.0.6/seafile.sh start"
+sudo su - www-data -c "/var/www/seafile/seafile-server-$seafile_version/seafile.sh start"
 sudo su - www-data -c "$final_path/first_launch.exp $admin_email $admin_password"
 
-# add sso config to unprotect domain.tld/seafhttp in /etc/ssowat/conf.json.persistent
+# Add sso config to unprotect domain.tld/seafhttp + domain.tld/seafdav do in /etc/ssowat/conf.json.persistent
 sudo cp ../conf/add_sso_conf.py $final_path
 sudo cp ../conf/remove_sso_conf.py $final_path
 sudo python $final_path/add_sso_conf.py
@@ -146,6 +142,15 @@ then
 else
 	sudo yunohost app setting seafile unprotected_uris -v "/"
 fi
+
+# Add webdav
+sudo cp ../conf/seafdav.conf $final_path/conf/seafdav.conf
+sudo sed -i "s@SEAFILE_FILESERVER_PORT@$fileserver_port@g" $final_path/conf/seafdav.conf
+
+# Add logrotate
+sudo cp ../conf/logrotate /etc/logrotate.d/seafile
+sudo sed -i "s@SEAFILE_DIR@$final_path@g" /etc/logrotate.d/seafile
+sudo service rsyslog restart
 
 # register yunohost service
 sudo yunohost service add seafile-server

@@ -4,7 +4,7 @@ set timeout 10
 set admin_email [lindex $argv 0]
 set admin_password [lindex $argv 1]
 
-spawn /var/www/seafile/seafile-server-4.0.6/seahub.sh start-fastcgi
+spawn /var/www/seafile/seafile-server-latest/seahub.sh start-fastcgi
 
 expect "for the admin account?"
 send "$admin_email\r";

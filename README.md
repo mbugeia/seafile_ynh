@@ -24,18 +24,16 @@ From command line:
 
 `sudo yunohost app upgrade -l Seafile https://github.com/mbugeia/seafile_ynh seafile`
 
-This will install Seafile v4.1.1 with HTTPS Sync only. /!\Not available on ARM for now /!\
+This will install Seafile v4.3.1 with HTTPS Sync only.
 
 Infos
 -----
 
-Seafile server v4.0.6
+Seafile server v4.3.1
 
-Available for x64, i386 and arm (Raspberry) architecture but only tested for x64 (feedback are welcome)
+Available for x64, i386, armhf and Raspberry architecture but only tested for x64 (feedback are welcome)
 
 TODO
 -----
 
- - Webdav configuration
  - Auto login/logout
- - logrotate configuration

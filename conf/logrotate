@@ -1,0 +1,28 @@
+SEAFILE_DIR/logs/seaf-server.log
+{
+        daily
+        missingok
+        rotate 52
+        compress
+        delaycompress
+        notifempty
+        sharedscripts
+        postrotate
+                [ ! -f SEAFILE_DIR/pids/seaf-server.pid ] || kill -USR1 `cat SEAFILE_DIR/pids/seaf-server.pid`
+        endscript
+}
+
+SEAFILE_DIR/logs/ccnet.log
+{
+        daily
+        missingok
+        rotate 52
+        compress
+        delaycompress
+        notifempty
+        sharedscripts
+        postrotate
+                [ ! -f SEAFILE_DIR/pids/ccnet.pid ] || kill -USR1 `cat SEAFILE_DIR/pids/ccnet.pid`
+        endscript
+}
+ 
