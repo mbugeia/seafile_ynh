@@ -11,6 +11,7 @@ sudo rm -rf /var/www/seafile
 sudo rm -f /etc/nginx/conf.d/$domain.d/seafile.conf
 sudo rm -f /etc/init.d/seafile-server
 sudo rm -rf /home/yunohost.app/seafile-data
+sudo rm -r /tmp/seahub_cache
 
 # Remove databases
 mysql -u root -p$root_pwd -e "DROP DATABASE ccnetdb ; DROP DATABASE seafiledb ; DROP DATABASE seahubdb ; DROP USER seafile@localhost ;"

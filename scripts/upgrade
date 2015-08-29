@@ -5,7 +5,7 @@ app=seafile
 installed_version=$(sudo yunohost app setting $app installed_version)
 architecture=$(sudo yunohost app setting $app architecture)
 root_pwd=$(sudo cat /etc/yunohost/mysql)
-seafile_version=4.3.1
+seafile_version=4.3.2
 final_path=/var/www/$app
 
 # extract new version
@@ -20,7 +20,7 @@ sudo service seafile-server stop
 # permission to execute update script and expect helper
 sudo chmod +x ../conf/upgrade_4.1.1.exp
 sudo chmod +x ../conf/upgrade_4.2.1.exp
-sudo chmod +x ../conf/upgrade_4.3.1.exp
+sudo chmod +x ../conf/upgrade_4.3.2.exp
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.0_4.1.sh
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.1_4.2.sh
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.2_4.3.sh
@@ -31,12 +31,12 @@ case $installed_version in
 	# Update seafile by script
 	sudo ../conf/upgrade_4.1.1.exp $root_pwd
 	sudo ../conf/upgrade_4.2.1.exp $root_pwd
-	sudo ../conf/upgrade_4.3.1.exp $root_pwd
+	sudo ../conf/upgrade_4.3.2.exp $root_pwd
 ;;
 "4.1."* )
 	# Update seafile by script
 	sudo ../conf/upgrade_4.2.1.exp $root_pwd
-	sudo ../conf/upgrade_4.3.1.exp $root_pwd
+	sudo ../conf/upgrade_4.3.2.exp $root_pwd
 ;;
 esac
 
@@ -59,7 +59,7 @@ then
 	
 	findPort 8080
 	webdav_port=$port
-	sudo yunohost app setting seafile fileserver_port -v $webdav_port
+	sudo yunohost app setting seafile webdav_port -v $webdav_port
 	
 	# Disallow port that was used by old seafile client
 	ccnet_port=$(sudo yunohost app setting $app ccnet_port)
@@ -74,7 +74,7 @@ then
 	
 	# Add webdav config
 	sudo cp ../conf/seafdav.conf $final_path/conf/seafdav.conf
-	sudo sed -i "s@SEAFILE_FILESERVER_PORT@$fileserver_port@g" $final_path/conf/seafdav.conf
+	sudo sed -i "s@WEBDAV_PORT@$webdav_port@g" $final_path/conf/seafdav.conf
 	
 	# Add sso config to unprotect domain.tld/seafdav in /etc/ssowat/conf.json.persistent
 	sudo cp ../conf/add_sso_conf.py $final_path
@@ -94,6 +94,9 @@ fi
 
 # restore correct permissions
 sudo chown -R www-data:www-data $final_path
+
+# delete seafile cache
+sudo rm -r /tmp/seahub_cache
 
 # restart seafile server
 sudo service seafile-server start

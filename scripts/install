@@ -9,7 +9,7 @@ is_public=$6
 architecture=$7
 final_path=/var/www/seafile
 seafile_data=/home/yunohost.app/seafile-data
-seafile_version=4.3.1
+seafile_version=4.3.2
 
 # Retrieve admin email
 admin_email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
@@ -58,7 +58,7 @@ webdav_port=$port
 # store config in yunohost
 sudo yunohost app setting seafile seahub_port -v $seahub_port
 sudo yunohost app setting seafile fileserver_port -v $fileserver_port
-sudo yunohost app setting seafile fileserver_port -v $webdav_port
+sudo yunohost app setting seafile webdav_port -v $webdav_port
 sudo yunohost app setting seafile is_public -v $is_public
 sudo yunohost app setting seafile architecture -v $architecture
 sudo yunohost app setting seafile installed_version -v $seafile_version
@@ -116,6 +116,10 @@ sed -i "s@SEAFILE_FILESERVER_PORT@$fileserver_port@g" ../conf/nginx.conf
 sed -i "s@WEBDAV_PORT@$webdav_port@g" ../conf/nginx.conf
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/seafile.conf
 
+# Add webdav
+sudo cp ../conf/seafdav.conf $final_path/conf/seafdav.conf
+sudo sed -i "s@WEBDAV_PORT@$webdav_port@g" $final_path/conf/seafdav.conf
+
 # Copy first launch script
 sudo cp ../conf/first_launch.exp $final_path
 sudo chmod +x $final_path/first_launch.exp
@@ -125,8 +129,8 @@ sudo chown -R www-data:www-data $final_path
 sudo chown -R www-data:www-data $seafile_data
 
 # Start seafile, seahub and populate admin account
-sudo su - www-data -c "/var/www/seafile/seafile-server-$seafile_version/seafile.sh start"
-sudo su - www-data -c "$final_path/first_launch.exp $admin_email $admin_password"
+sudo su - www-data -s /bin/bash -c "/var/www/seafile/seafile-server-$seafile_version/seafile.sh start"
+sudo su - www-data -s /bin/bash -c "$final_path/first_launch.exp $admin_email $admin_password"
 
 # Add sso config to unprotect domain.tld/seafhttp + domain.tld/seafdav do in /etc/ssowat/conf.json.persistent
 sudo cp ../conf/add_sso_conf.py $final_path
@@ -143,10 +147,6 @@ else
 	sudo yunohost app setting seafile unprotected_uris -v "/"
 fi
 
-# Add webdav
-sudo cp ../conf/seafdav.conf $final_path/conf/seafdav.conf
-sudo sed -i "s@SEAFILE_FILESERVER_PORT@$fileserver_port@g" $final_path/conf/seafdav.conf
-
 # Add logrotate
 sudo cp ../conf/logrotate /etc/logrotate.d/seafile
 sudo sed -i "s@SEAFILE_DIR@$final_path@g" /etc/logrotate.d/seafile
@@ -159,5 +159,7 @@ sudo yunohost service add seafile-server
 sudo service nginx reload
 sudo yunohost app ssowatconf
 
-# Start seafile
+# Restart seafile
+sudo su - www-data -s /bin/bash -c "/var/www/seafile/seafile-server-latest/seahub.sh stop"
+sudo service seafile-server stop
 sudo service seafile-server start
