@@ -32,6 +32,7 @@ Infos
 Seafile server v4.3.1
 
 Available for x64, i386, armhf and Raspberry architecture but only tested for x64 (feedback are welcome)
+
 In armhf it don't run actually. Please see this issue : https://github.com/haiwen/seafile/issues/1358
 
 TODO
