@@ -29,7 +29,7 @@ This will install Seafile v4.3.1 with HTTPS Sync only.
 Infos
 -----
 
-Seafile server v4.3.1
+Seafile server v4.3.2
 
 Available for x64, i386, armhf and Raspberry architecture but only tested for x64 (feedback are welcome)
 
