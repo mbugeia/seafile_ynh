@@ -5,7 +5,7 @@ app=seafile
 installed_version=$(sudo yunohost app setting $app installed_version)
 architecture=$(sudo yunohost app setting $app architecture)
 root_pwd=$(sudo cat /etc/yunohost/mysql)
-seafile_version=4.1.1
+seafile_version=4.3.2
 final_path=/var/www/$app
 
 # extract new version
@@ -19,19 +19,84 @@ sudo service seafile-server stop
 
 # permission to execute update script and expect helper
 sudo chmod +x ../conf/upgrade_4.1.1.exp
+sudo chmod +x ../conf/upgrade_4.2.1.exp
+sudo chmod +x ../conf/upgrade_4.3.2.exp
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.0_4.1.sh
+sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.1_4.2.sh
+sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.2_4.3.sh
 
 # do the upgrade
-sudo ../conf/upgrade_4.1.1.exp $root_pwd
+case $installed_version in
+"4.0."* )
+	# Update seafile by script
+	sudo ../conf/upgrade_4.1.1.exp $root_pwd
+	sudo ../conf/upgrade_4.2.1.exp $root_pwd
+	sudo ../conf/upgrade_4.3.2.exp $root_pwd
+;;
+"4.1."* )
+	# Update seafile by script
+	sudo ../conf/upgrade_4.2.1.exp $root_pwd
+	sudo ../conf/upgrade_4.3.2.exp $root_pwd
+;;
+esac
+
+## Install webdav and logrotate if not installed
+if [[ $installed_version = "4.0."* ]] || [[ $installed_version = "4.1."* ]]
+then
+	# findPort
+	findPort () {
+	    port=$1
+
+	    sudo yunohost app checkport $port
+	    while [[ ! $? -eq 0 ]]
+		do
+		    port=$(($port + 1))
+		    sudo yunohost app checkport $port
+		done
+
+	  return $port
+	}
+	
+	findPort 8080
+	webdav_port=$port
+	sudo yunohost app setting seafile webdav_port -v $webdav_port
+	
+	# Disallow port that was used by old seafile client
+	ccnet_port=$(sudo yunohost app setting $app ccnet_port)
+	seafile_port=$(sudo yunohost app setting $app seafile_port)
+	sudo yunohost firewall disallow Both $ccnet_port
+	sudo yunohost firewall disallow Both $seafile_port
+	
+	# Add webdav to nginx config
+	sed -i "s@WEBDAV_PORT@$webdav_port@g" ../conf/nginx_add_webdav
+	domain=$(sudo yunohost app setting seafile domain)
+	echo $(cat ../conf/nginx_add_webdav) | sudo tee -a /etc/nginx/conf.d/$domain.d/seafile.conf
+	
+	# Add webdav config
+	sudo cp ../conf/seafdav.conf $final_path/conf/seafdav.conf
+	sudo sed -i "s@WEBDAV_PORT@$webdav_port@g" $final_path/conf/seafdav.conf
+	
+	# Add sso config to unprotect domain.tld/seafdav in /etc/ssowat/conf.json.persistent
+	sudo cp ../conf/add_sso_conf.py $final_path
+	sudo cp ../conf/add_sso_conf_webdav.py $final_path
+	sudo cp ../conf/remove_sso_conf.py $final_path
+	sudo python $final_path/add_sso_conf_webdav.py
+	
+	# Update seafile config
+	echo 'COMPRESS_URL = MEDIA_URL' | sudo tee -a $final_path/seahub_settings.py
+	echo "STATIC_URL = MEDIA_URL + 'assets/'" | sudo tee -a $final_path/seahub_settings.py
+	
+	# Add logrotate
+	sudo cp ../conf/logrotate /etc/logrotate.d/seafile
+	sudo sed -i "s@SEAFILE_DIR@$final_path@g" /etc/logrotate.d/seafile
+	sudo service rsyslog restart
+fi
 
 # restore correct permissions
 sudo chown -R www-data:www-data $final_path
 
-# disallow port that was used by old seafile client
-ccnet_port=$(sudo yunohost app setting $app ccnet_port)
-seafile_port=$(sudo yunohost app setting $app seafile_port)
-sudo yunohost firewall disallow $ccnet_port
-sudo yunohost firewall disallow $seafile_port
+# delete seafile cache
+sudo rm -r /tmp/seahub_cache
 
 # restart seafile server
 sudo service seafile-server start

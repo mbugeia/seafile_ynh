@@ -3,7 +3,7 @@ set timeout 5
 
 set mysql_password [lindex $argv 0]
 
-spawn /var/www/seafile/seafile-server-4.1.1/upgrade/upgrade_4.0_4.1.sh
+spawn /var/www/seafile/seafile-server-4.3.2/upgrade/upgrade_4.0_4.1.sh
 
 expect "to contiune"
 send "\r";

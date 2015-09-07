@@ -3,13 +3,11 @@ set timeout 10
 
 set server_name [lindex $argv 0]
 set domain [lindex $argv 1]
-set ccnet_port [lindex $argv 2]
-set seafile_data [lindex $argv 3]
-set seafile_port [lindex $argv 4]
-set fileserver_port [lindex $argv 5]
-set db_pwd [lindex $argv 6]
+set seafile_data [lindex $argv 2]
+set fileserver_port [lindex $argv 3]
+set db_pwd [lindex $argv 4]
 
-spawn /var/www/seafile/seafile-server-4.0.6/setup-seafile-mysql.sh
+spawn /var/www/seafile/seafile-server-4.3.2/setup-seafile-mysql.sh
 
 expect "Press ENTER to continue"
 send "\r";
@@ -20,14 +18,8 @@ send "$server_name\r";
 expect "What is the ip or domain of the server?"
 send "$domain\r";
 
-expect "Which port do you want to use for the ccnet server?"
-send "$ccnet_port\r";
-
 expect "Where do you want to put your seafile data?"
 send "$seafile_data\r";
-
-expect "Which port do you want to use for the seafile server?"
-send "$seafile_port\r";
 
 expect "Which port do you want to use for the seafile fileserver?"
 send "$fileserver_port\r";
