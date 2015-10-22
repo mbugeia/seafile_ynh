@@ -9,7 +9,7 @@ is_public=$6
 architecture=$7
 final_path=/var/www/seafile
 seafile_data=/home/yunohost.app/seafile-data
-seafile_version=4.3.2
+seafile_version=4.4.3
 
 # Retrieve admin email
 admin_email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
