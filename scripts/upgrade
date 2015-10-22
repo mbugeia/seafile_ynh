@@ -5,7 +5,7 @@ app=seafile
 installed_version=$(sudo yunohost app setting $app installed_version)
 architecture=$(sudo yunohost app setting $app architecture)
 root_pwd=$(sudo cat /etc/yunohost/mysql)
-seafile_version=4.3.2
+seafile_version=4.4.3
 final_path=/var/www/$app
 
 # extract new version
@@ -21,9 +21,11 @@ sudo service seafile-server stop
 sudo chmod +x ../conf/upgrade_4.1.1.exp
 sudo chmod +x ../conf/upgrade_4.2.1.exp
 sudo chmod +x ../conf/upgrade_4.3.2.exp
+sudo chmod +x ../conf/upgrade_4.4.3.exp
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.0_4.1.sh
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.1_4.2.sh
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.2_4.3.sh
+sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.3_4.4.sh
 
 # do the upgrade
 case $installed_version in
@@ -37,6 +39,10 @@ case $installed_version in
 	# Update seafile by script
 	sudo ../conf/upgrade_4.2.1.exp $root_pwd
 	sudo ../conf/upgrade_4.3.2.exp $root_pwd
+;;
+"4.3."* )
+	# Update seafile by script
+	sudo ../conf/upgrade_4.4.3.exp $root_pwd
 ;;
 esac
 

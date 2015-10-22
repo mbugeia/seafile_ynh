@@ -22,18 +22,18 @@ Upgrade
 
 From command line:
 
-`sudo yunohost app upgrade -l Seafile https://github.com/mbugeia/seafile_ynh seafile`
-
-This will install Seafile v4.3.1 with HTTPS Sync only.
+`sudo yunohost app upgrade -u https://github.com/mbugeia/seafile_ynh seafile`
 
 Infos
 -----
 
-Seafile server v4.3.2
+Seafile server v4.4.3
 
-Available for x64, i386, armhf and Raspberry architecture but only tested for x64 (feedback are welcome)
+Available for x64, i386, and Raspberry architecture but only tested for x64 (feedback are welcome)
 
-In armhf it don't run actually. Please see this issue : https://github.com/haiwen/seafile/issues/1358
+Seafile no longer supports armhf architectures AFAIK.
+
+/!\ To login use your yunohost email not your username.
 
 TODO
 -----
