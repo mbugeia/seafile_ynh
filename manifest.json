@@ -70,7 +70,7 @@
                     "en": "What is the server architecture?",
                     "fr": "Quelle est l'architecture du serveur ?"
                 },
-                "choices": ["x86-64", "i386", "rpi", "armhf"],
+                "choices": ["x86-64", "i386", "rpi"],
                 "default": "x86-64"
             }
         ]
