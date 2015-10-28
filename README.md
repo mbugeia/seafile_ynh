@@ -35,6 +35,17 @@ Seafile no longer supports armhf architectures AFAIK.
 
 /!\ To login use your yunohost email not your username.
 
+License
+-------
+
+Seafile server and its desktop clients are published under GPLv2.
+
+Mobile clients are published under the GPLv3.
+
+The Seafile server's web end, i.e. Seahub, is published under the Apache License.
+
+This package is published under MIT License
+
 TODO
 -----
 
