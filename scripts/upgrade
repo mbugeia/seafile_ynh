@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 app=seafile
 
 # Retrieve settings
