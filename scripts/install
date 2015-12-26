@@ -12,7 +12,7 @@ is_public=$6
 architecture=$7
 final_path=/var/www/$app
 seafile_data=/home/yunohost.app/seafile-data
-seafile_version=4.4.3
+seafile_version=5.0.3
 
 # Retrieve admin email
 admin_email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
@@ -78,29 +78,29 @@ sudo chmod +x $final_path/seafile-server-$seafile_version/setup-seafile-mysql.sh
 sudo ../conf/install.exp $server_name $domain $seafile_data $fileserver_port $db_pwd
 
 # Update seafile config
-sudo sed -i "s@http://@https://@g" $final_path/ccnet/ccnet.conf
-sudo sed -i "s@:8000@$path@g" $final_path/ccnet/ccnet.conf
-echo 'FILE_SERVER_ROOT = "https://'$domain'/seafhttp"' | sudo tee -a $final_path/seahub_settings.py
-echo 'SITE_ROOT = "'$path'/"' | sudo tee -a $final_path/seahub_settings.py
-echo 'SERVE_STATIC = False' | sudo tee -a $final_path/seahub_settings.py
-echo 'MEDIA_URL = "'$path'/media/"' | sudo tee -a $final_path/seahub_settings.py
-echo 'COMPRESS_URL = MEDIA_URL' | sudo tee -a $final_path/seahub_settings.py
-echo "STATIC_URL = MEDIA_URL + 'assets/'" | sudo tee -a $final_path/seahub_settings.py
+sudo sed -i "s@http://@https://@g" $final_path/conf/ccnet.conf
+sudo sed -i "s@:8000@$path@g" $final_path/conf/ccnet.conf
+echo 'FILE_SERVER_ROOT = "https://'$domain'/seafhttp"' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'SITE_ROOT = "'$path'/"' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'SERVE_STATIC = False' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'MEDIA_URL = "'$path'/media/"' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'COMPRESS_URL = MEDIA_URL' | sudo tee -a $final_path/conf/seahub_settings.py
+echo "STATIC_URL = MEDIA_URL + 'assets/'" | sudo tee -a $final_path/conf/seahub_settings.py
 
 # Email configuration
-echo 'EMAIL_USE_TLS = False' | sudo tee -a $final_path/seahub_settings.py
-echo 'EMAIL_HOST = "localhost"' | sudo tee -a $final_path/seahub_settings.py
-echo 'EMAIL_HOST_USER = "seafile@'$domain'"' | sudo tee -a $final_path/seahub_settings.py
-echo 'EMAIL_HOST_PASSWORD = ""' | sudo tee -a $final_path/seahub_settings.py
-echo 'EMAIL_PORT = "25"' | sudo tee -a $final_path/seahub_settings.py
-echo 'DEFAULT_FROM_EMAIL = "seafile@'$domain'"' | sudo tee -a $final_path/seahub_settings.py
-echo 'SERVER_EMAIL = "seafile@'$domain'"' | sudo tee -a $final_path/seahub_settings.py
+echo 'EMAIL_USE_TLS = False' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'EMAIL_HOST = "localhost"' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'EMAIL_HOST_USER = "seafile@'$domain'"' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'EMAIL_HOST_PASSWORD = ""' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'EMAIL_PORT = "25"' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'DEFAULT_FROM_EMAIL = "seafile@'$domain'"' | sudo tee -a $final_path/conf/seahub_settings.py
+echo 'SERVER_EMAIL = "seafile@'$domain'"' | sudo tee -a $final_path/conf/seahub_settings.py
 
 # LDAP configuration
-echo '[LDAP]' | sudo tee -a $final_path/ccnet/ccnet.conf
-echo 'HOST = ldap://localhost:389' | sudo tee -a $final_path/ccnet/ccnet.conf
-echo 'BASE = ou=users,dc=yunohost,dc=org' | sudo tee -a $final_path/ccnet/ccnet.conf
-echo 'LOGIN_ATTR = mail' | sudo tee -a $final_path/ccnet/ccnet.conf
+echo '[LDAP]' | sudo tee -a $final_path/conf/ccnet.conf
+echo 'HOST = ldap://localhost:389' | sudo tee -a $final_path/conf/ccnet.conf
+echo 'BASE = ou=users,dc=yunohost,dc=org' | sudo tee -a $final_path/conf/ccnet.conf
+echo 'LOGIN_ATTR = mail' | sudo tee -a $final_path/conf/ccnet.conf
 
 # Add Seafile Server to startup
 sudo cp ../conf/seafile-server /etc/init.d

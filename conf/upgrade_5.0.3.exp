@@ -1,0 +1,11 @@
+#!/usr/bin/expect
+set timeout 5
+
+set mysql_password [lindex $argv 0]
+
+spawn /var/www/seafile/seafile-server-5.0.3/upgrade/upgrade_4.4_5.0.sh
+
+expect "to contiune"
+send "\r";
+
+interact
