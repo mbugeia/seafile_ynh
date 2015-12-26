@@ -36,6 +36,7 @@ sudo yunohost app checkurl $domain$path -a $app  \
     || (echo "Path not available: $domain$path" && exit 1)
 
 # Check dependencies
+sudo apt-get update
 sudo apt-get install -qq python2.7 python-setuptools python-simplejson python-imaging python-mysqldb python-flup expect
 
 # Copy files to the right place
