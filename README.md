@@ -49,4 +49,21 @@ This package is published under MIT License
 TODO
 -----
 
- - Auto login/logout
+ - Auto login/logout, see #1
+ - Test of backup/restore script
+
+Developper infos
+----------------
+
+Please do your pull request to the Dev branch.
+
+Test or upgrade to dev version:
+```
+su - admin
+git clone -b Dev https://github.com/mbugeia/seafile_ynh
+# to install
+sudo yunohost app install -l Seafile /home/admin/seafile_ynh
+# to upgrade
+sudo yunohost app upgrade -f /home/admin/seafile_ynh seafile
+
+```
