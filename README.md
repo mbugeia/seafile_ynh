@@ -27,11 +27,11 @@ From command line:
 Infos
 -----
 
-Seafile server v4.4.3
+Seafile server v5.0.3
 
-Available for x64, i386, and Raspberry architecture but only tested for x64 (feedback are welcome)
+Available for x64, i386, and Raspberry Pi architecture but only tested for x64 (feedback are welcome)
 
-Seafile no longer supports armhf architectures AFAIK.
+Seafile no longer distribute binary for generic armhf architectures but rpi binary could work.
 
 /!\ To login use your yunohost email not your username.
 
