@@ -45,9 +45,9 @@ sudo mkdir -p $final_path/installed
 sudo mkdir -p $final_path/logs
 sudo mkdir -p $final_path/seafile-data
 sudo mkdir -p $final_path/seafile-server-$seafile_version
-sudo tar xzf ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar'
+sudo tar xzf ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar.gz'
 sudo mv seafile-server-$seafile_version/* $final_path/seafile-server-$seafile_version
-sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar' $final_path/installed
+sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar.gz' $final_path/installed
 
 # Find available ports
 findPort 8000

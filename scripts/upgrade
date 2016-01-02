@@ -11,9 +11,9 @@ final_path=/var/www/$app
 
 # extract new version
 sudo mkdir -p $final_path/seafile-server-$seafile_version
-sudo tar xzf ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar'
+sudo tar xzf ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar.gz'
 sudo mv seafile-server-$seafile_version/* $final_path/seafile-server-$seafile_version
-sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar' $final_path/installed
+sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar.gz' $final_path/installed
 
 # stop seafile server
 sudo service seafile-server stop
@@ -115,7 +115,7 @@ sudo rm -r /tmp/seahub_cache
 sudo service seafile-server start
 
 # remove old version files
-sudo rm -f $final_path/installed/seafile-server_$installed_version_$architecture.tar
+sudo rm -f $final_path/installed/seafile-server_$installed_version_$architecture.tar*
 sudo rm -f $final_path/seafile-server_$installed_version_$architecture
 
 # store new installed version
