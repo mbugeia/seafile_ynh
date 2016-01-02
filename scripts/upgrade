@@ -1,18 +1,19 @@
 #!/bin/bash
+
 app=seafile
 
 # Retrieve settings
 installed_version=$(sudo yunohost app setting $app installed_version)
 architecture=$(sudo yunohost app setting $app architecture)
 root_pwd=$(sudo cat /etc/yunohost/mysql)
-seafile_version=4.4.3
+seafile_version=5.0.3
 final_path=/var/www/$app
 
 # extract new version
 sudo mkdir -p $final_path/seafile-server-$seafile_version
-sudo tar xzf ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar'
+sudo tar xzf ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar.gz'
 sudo mv seafile-server-$seafile_version/* $final_path/seafile-server-$seafile_version
-sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar' $final_path/installed
+sudo mv ../sources/'seafile-server_'$seafile_version'_'$architecture'.tar.gz' $final_path/installed
 
 # stop seafile server
 sudo service seafile-server stop
@@ -22,10 +23,12 @@ sudo chmod +x ../conf/upgrade_4.1.1.exp
 sudo chmod +x ../conf/upgrade_4.2.1.exp
 sudo chmod +x ../conf/upgrade_4.3.2.exp
 sudo chmod +x ../conf/upgrade_4.4.3.exp
+sudo chmod +x ../conf/upgrade_5.0.3.exp
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.0_4.1.sh
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.1_4.2.sh
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.2_4.3.sh
 sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.3_4.4.sh
+sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.4_5.0.sh
 
 # do the upgrade
 case $installed_version in
@@ -43,6 +46,10 @@ case $installed_version in
 "4.3."* )
 	# Update seafile by script
 	sudo ../conf/upgrade_4.4.3.exp $root_pwd
+;;
+"4.4."* )
+	# Update seafile by script
+	sudo ../conf/upgrade_5.0.3.exp $root_pwd
 ;;
 esac
 
@@ -108,7 +115,7 @@ sudo rm -r /tmp/seahub_cache
 sudo service seafile-server start
 
 # remove old version files
-sudo rm -f $final_path/installed/seafile-server_$installed_version_$architecture.tar
+sudo rm -f $final_path/installed/seafile-server_$installed_version_$architecture.tar*
 sudo rm -f $final_path/seafile-server_$installed_version_$architecture
 
 # store new installed version

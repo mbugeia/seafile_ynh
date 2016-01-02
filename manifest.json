@@ -6,11 +6,14 @@
         "fr": "Stockage Cloud Open Source"
     },
     "developer": {
-        "name": "",
-        "email": "",
-        "url": ""
+        "name": "mbugeia",
+        "email": "maxime@max.privy.place"
     },
     "multi_instance": "false",
+    "services": [
+        "nginx",
+        "mysql"
+    ],
     "arguments": {
         "install": [
             {
