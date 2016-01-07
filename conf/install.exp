@@ -1,13 +1,14 @@
 #!/usr/bin/expect
 set timeout 10
 
-set server_name [lindex $argv 0]
-set domain [lindex $argv 1]
-set seafile_data [lindex $argv 2]
-set fileserver_port [lindex $argv 3]
-set db_pwd [lindex $argv 4]
+set seafile_dir [lindex $argv 0]
+set server_name [lindex $argv 1]
+set domain [lindex $argv 2]
+set seafile_data [lindex $argv 3]
+set fileserver_port [lindex $argv 4]
+set db_pwd [lindex $argv 5]
 
-spawn /var/www/seafile/seafile-server-5.0.3/setup-seafile-mysql.sh
+spawn $seafile_dir/setup-seafile-mysql.sh
 
 expect "Press ENTER to continue"
 send "\r";

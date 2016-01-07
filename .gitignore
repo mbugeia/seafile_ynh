@@ -216,3 +216,8 @@ pip-log.txt
 .mr.developer.cfg
 
 .idea
+
+
+# From kateproject
+.kateproject
+.kateproject.d

@@ -76,7 +76,7 @@ sudo yunohost app setting seafile db_pwd -v $db_pwd
 # Run install script
 sudo chmod +x ../conf/install.exp
 sudo chmod +x $final_path/seafile-server-$seafile_version/setup-seafile-mysql.sh
-sudo ../conf/install.exp $server_name $domain $seafile_data $fileserver_port $db_pwd
+sudo ../conf/install.exp $final_path/seafile-server-$seafile_version $server_name $domain $seafile_data $fileserver_port $db_pwd
 
 # Update seafile config
 sudo sed -i "s@http://@https://@g" $final_path/conf/ccnet.conf
@@ -132,7 +132,7 @@ sudo chown -R www-data:www-data $seafile_data
 
 # Start seafile, seahub and populate admin account
 sudo su - www-data -s /bin/bash -c "/var/www/seafile/seafile-server-$seafile_version/seafile.sh start"
-sudo su - www-data -s /bin/bash -c "$final_path/first_launch.exp $admin_email $admin_password"
+sudo su - www-data -s /bin/bash -c "$final_path/first_launch.exp $final_path/seafile-server-$seafile_version $admin_email $admin_password"
 
 # Add sso config to unprotect domain.tld/seafhttp + domain.tld/seafdav do in /etc/ssowat/conf.json.persistent
 sudo cp ../conf/add_sso_conf.py $final_path

@@ -34,22 +34,27 @@ sudo chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_4.4_5.
 case $installed_version in
 "4.0."* )
 	# Update seafile by script
-	sudo ../conf/upgrade_4.1.1.exp $root_pwd
-	sudo ../conf/upgrade_4.2.1.exp $root_pwd
-	sudo ../conf/upgrade_4.3.2.exp $root_pwd
+	sudo ../conf/upgrade_4.1.1.exp $final_path/seafile-server-$seafile_version $root_pwd
+	sudo ../conf/upgrade_4.2.1.exp $final_path/seafile-server-$seafile_version $root_pwd
+	sudo ../conf/upgrade_4.3.2.exp $final_path/seafile-server-$seafile_version $root_pwd
+	sudo ../conf/upgrade_4.4.3.exp $final_path/seafile-server-$seafile_version $root_pwd
+	sudo ../conf/upgrade_5.0.3.exp $final_path/seafile-server-$seafile_version $root_pwd
 ;;
 "4.1."* )
 	# Update seafile by script
-	sudo ../conf/upgrade_4.2.1.exp $root_pwd
-	sudo ../conf/upgrade_4.3.2.exp $root_pwd
+	sudo ../conf/upgrade_4.2.1.exp $final_path/seafile-server-$seafile_version $root_pwd
+	sudo ../conf/upgrade_4.3.2.exp $final_path/seafile-server-$seafile_version $root_pwd
+	sudo ../conf/upgrade_4.4.3.exp $final_path/seafile-server-$seafile_version $root_pwd
+	sudo ../conf/upgrade_5.0.3.exp $final_path/seafile-server-$seafile_version $root_pwd
 ;;
 "4.3."* )
 	# Update seafile by script
-	sudo ../conf/upgrade_4.4.3.exp $root_pwd
+	sudo ../conf/upgrade_4.4.3.exp $final_path/seafile-server-$seafile_version $root_pwd
+	sudo ../conf/upgrade_5.0.3.exp $final_path/seafile-server-$seafile_version $root_pwd
 ;;
 "4.4."* )
 	# Update seafile by script
-	sudo ../conf/upgrade_5.0.3.exp $root_pwd
+	sudo ../conf/upgrade_5.0.3.exp $final_path/seafile-server-$seafile_version $root_pwd
 ;;
 esac
 
