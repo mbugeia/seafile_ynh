@@ -1,4 +1,4 @@
-Seafile For yunohost
+Seafile Professional Edition For yunohost
 =================
 
 [![Integration level](https://dash.yunohost.org/integration/seafile.svg)](https://ci-apps.yunohost.org/ci/apps/seafile%20%28Community%29/lastBuild/consoleFull)  
@@ -14,7 +14,7 @@ Seafile is an open Source Cloud Storage application.
 
 It's a Enterprise file sync and share platform with high reliability and performance. It's a file hosting platform with high reliability and performance. Put files on your own server. Sync and share files across different devices, or access all the files as a virtual disk.
 
-**Shipped version:** 6.3.4
+**Shipped version:** Professional Edition 6.3.7
 
 Screenshots
 -----------
