@@ -17,4 +17,4 @@ expect "Enter the"
 send {__ADMIN_PASSWORD__};
 send '\r';
 
-interact
+expect eof
