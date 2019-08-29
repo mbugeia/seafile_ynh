@@ -14,7 +14,7 @@ diff -Naur a/seahub/seahub/auth/middleware.py b/seahub/seahub/auth/middleware.py
                  " before the RemoteUserMiddleware class.")
          try:
 -            username = request.META[self.header]
-+            username = request.META["HTTP_REMOTE_USER"] + '@' + request.META["HTTP_HOST"]
++            username = request.META["HTTP_EMAIL"]
          except KeyError:
              # If specified header doesn't exist then return (leaving
              # request.user set to AnonymousUser by the
