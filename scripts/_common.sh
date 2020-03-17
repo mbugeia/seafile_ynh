@@ -20,8 +20,8 @@ install_source() {
 }
 
 install_dependance() {
-	ynh_install_app_dependencies python2.7 python-pip libpython2.7 python-setuptools python-ldap python-urllib3 python-simplejson python-imaging python-mysqldb python-flup expect python-requests python-dev ffmpeg python-memcache \
-        libjpeg62-turbo-dev zlib1g-dev # For building pillow
+	ynh_install_app_dependencies "python2.7 python-pip libpython2.7 python-setuptools python-ldap python-urllib3 python-simplejson python-imaging|python-pil python-mysqldb python-flup expect python-requests python-dev ffmpeg python-memcache \
+        libjpeg62-turbo-dev zlib1g-dev" # For building pillow
     ynh_add_swap 2000
     # Note that we install imageio to force the dependance, without this imageio 2.8 is installed and it need python3.5
     sudo -u $seafile_user pip install --user --upgrade Pillow 'moviepy<1.0' 'imageio<2.8' certifi idna
