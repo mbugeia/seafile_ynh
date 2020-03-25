@@ -57,10 +57,6 @@ su -c "mysql -u ${app} -p$db_pwd seahubdb < ${YNH_CWD}/seahubdb.dmp"
 # GENERIC FINALIZATION
 #=================================================
 
-# Restore sso persistent config
-ynh_script_progression --message="Configuring permissions..."
-python3 ../settings/conf/add_sso_conf.py || ynh_die --message="Your file /etc/ssowat/conf.json.persistent doesn't respect the json syntax. Please fix the syntax to install this app."
-
 # Add logrotate
 ynh_script_progression --message="Configuring log rotation..."
 ynh_use_logrotate --logfile $final_path/logs

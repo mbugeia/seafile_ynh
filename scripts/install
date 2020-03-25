@@ -136,6 +136,7 @@ echo '[LDAP]' | tee -a $final_path/conf/ccnet.conf
 echo 'HOST = ldap://localhost:389' | tee -a $final_path/conf/ccnet.conf
 echo 'BASE = ou=users,dc=yunohost,dc=org' | tee -a $final_path/conf/ccnet.conf
 echo 'LOGIN_ATTR = mail' | tee -a $final_path/conf/ccnet.conf
+echo 'FILTER = &(objectClass=posixAccount)(permission=cn='$app'.main,ou=permission,dc=yunohost,dc=org)' | tee -a $final_path/conf/ccnet.conf
 
 # Enable manually wiki
 echo 'ENABLE_WIKI = True' | tee -a $final_path/conf/seahub_settings.py
@@ -190,17 +191,14 @@ set_permission
 
 ynh_script_progression --message="Configuring permissions..."
 
-# Add sso config to unprotect domain.tld/seafhttp + domain.tld/seafdav do in /etc/ssowat/conf.json.persistent
-python3 ../conf/add_sso_conf.py || ynh_die --message="Your file /etc/ssowat/conf.json.persistent doesn't respect the json syntax. Please fix the syntax to install this app."
+# unprotect media, seafhttp, seafdav
+ynh_permission_create --permission "media" --url '/media' --allowed 'visitors'
+ynh_permission_create --permission "fileserver" --url "$domain/seafhttp" --allowed 'visitors'
+ynh_permission_create --permission "webdav" --url "$domain/seafdav" --allowed 'visitors'
 
-# unprotect media
-ynh_app_setting_set --app $app --key unprotected_uris --value "/media"
-
-if [ "$is_public" = "0" ]
+if [ "$is_public" == '1' ];
 then
-	ynh_app_setting_delete --app seafile --key unprotected_uris
-else
-	ynh_app_setting_set --app $app --key unprotected_uris --value "/"
+    ynh_permission_update --permission "main" --add "visitors"
 fi
 
 # Add logrotate

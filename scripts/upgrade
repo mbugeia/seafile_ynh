@@ -19,6 +19,7 @@ ynh_script_progression --message="Loading installation settings..."
 # Retrieve arguments
 domain=$(ynh_app_setting_get --app $app --key domain)
 path_url=$(ynh_normalize_url_path --path_url $(ynh_app_setting_get --app $app --key path))
+is_public=$(ynh_app_setting_get --app $app --key is_public)
 installed_version=$(ynh_app_setting_get --app $app --key installed_version)
 seahub_port=$(ynh_app_setting_get --app $app --key seahub_port)
 fileserver_port=$(ynh_app_setting_get --app $app --key fileserver_port)
@@ -215,6 +216,11 @@ then
     ynh_app_setting_set --app $app --key fileserver_port --value $fileserver_port
 fi
 
+# Add filter settings if needed
+if ! grep -q "FILTER" $final_path/conf/ccnet.conf; then
+    echo 'FILTER = &(objectClass=posixAccount)(permission=cn='$app'.main,ou=permission,dc=yunohost,dc=org)' | tee -a $final_path/conf/ccnet.conf
+fi
+
 #=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
@@ -230,6 +236,20 @@ ynh_add_systemd_config --service seahub --template seahub.service
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
+
+# Set all permissions
+ynh_script_progression --message="Update permission..."
+if ! ynh_permission_exists --permission fileserver; then
+    ynh_app_setting_delete --app $app --key unprotected_uris
+    python3 ../conf/remove_sso_conf.py
+    ynh_permission_create --permission "media" --url '/media' --allowed 'visitors'
+    ynh_permission_create --permission "fileserver" --url "$domain/seafhttp" --allowed 'visitors'
+    ynh_permission_create --permission "webdav" --url "$domain/seafdav" --allowed 'visitors'
+fi
+if [ "$is_public" == '1' ];
+then
+    ynh_permission_update --permission "main" --add "visitors"
+fi
 
 # Set all permissions
 ynh_script_progression --message="Protecting directory..."
