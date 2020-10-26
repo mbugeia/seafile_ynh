@@ -74,7 +74,7 @@ if [ $final_path == "/var/www/$app" ]; then
         # Data directory empty, so considere that all data are already in /home/yunohost.app/seafile
         mv /opt/yunohost/$app/seafile-data/* /home/yunohost.app/seafile-data/
         ynh_secure_remove $final_path/seafile_data
-        ln -s $seafile_data $final_path/seafile_data
+        ln -s /home/yunohost.app/seafile-data $final_path/
     fi
     ln -s $final_path/logs /var/log/seafile
     set_permission
