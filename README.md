@@ -1,8 +1,8 @@
-Seafile For yunohost
+Seafile for YunoHost
 =================
 
 [![Integration level](https://dash.yunohost.org/integration/seafile.svg)](https://dash.yunohost.org/appci/app/seafile) ![](https://ci-apps.yunohost.org/ci/badges/seafile.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/seafile.maintain.svg)  
-[![Install seafile with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=seafile)
+[![Install seafile with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=seafile)
 
 > *This package allow you to install seafile quickly and simply on a YunoHost server.  
 If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
