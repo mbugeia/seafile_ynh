@@ -290,7 +290,7 @@ ynh_add_systemd_config --service seahub --template seahub.service
 ynh_script_progression --message="Update permission..."
 if ! ynh_permission_exists --permission fileserver; then
     ynh_app_setting_delete --app $app --key unprotected_uris
-    python3 ../conf/remove_sso_conf.py
+    #python3 ../conf/remove_sso_conf.py
     ynh_permission_create --permission "media" --url '/media' --allowed 'visitors'
     ynh_permission_create --permission "fileserver" --url "$domain/seafhttp" --allowed 'visitors'
     ynh_permission_create --permission "webdav" --url "$domain/seafdav" --allowed 'visitors'
