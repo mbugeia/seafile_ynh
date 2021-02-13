@@ -4,15 +4,15 @@
 # GENERIC START
 #=================================================
 
+# Import common cmd
+source ../settings/scripts/experimental_helper.sh
+source ../settings/scripts/_common.sh
+
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
 
 # Stop script if errors
 ynh_abort_if_errors
-
-# Import common cmd
-source ../settings/scripts/experimental_helper.sh
-source ../settings/scripts/_common.sh
 
 ynh_script_progression --message="Loading settings..."
 
@@ -69,8 +69,8 @@ set_permission
 # Enable service and start seafile
 ynh_script_progression --message="Reconfiguring application..."
 systemctl daemon-reload
-systemctl enable seafile
-systemctl enable seahub
+systemctl enable seafile --quiet
+systemctl enable seahub --quiet
 
 # Add Seafile to YunoHost's monitored services
 ynh_script_progression --message="Register seafile service..."

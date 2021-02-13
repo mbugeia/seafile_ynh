@@ -4,7 +4,7 @@
     "packaging_format": 1,
     "license": "AGPL-3.0,Apache-2.0,MIT,GPL-2.0",
     "url": "https://www.seafile.com",
-    "version": "7.0.5~ynh1",
+    "version": "7.1.5~ynh1",
     "description": {
         "en": "Open Source Cloud Storage",
         "fr": "Stockage Cloud Open Source"
@@ -23,7 +23,7 @@
         "mysql"
     ],
     "requirements": {
-        "yunohost": ">= 3.7.0.6"
+        "yunohost": ">= 4.0"
     },
     "arguments": {
         "install": [

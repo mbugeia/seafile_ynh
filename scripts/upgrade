@@ -4,15 +4,15 @@
 # GENERIC START
 #=================================================
 
+# Import common cmd
+source ./experimental_helper.sh
+source ./_common.sh
+
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
 
 # Stop script if errors
 ynh_abort_if_errors
-
-# Import common cmd
-source ./experimental_helper.sh
-source ./_common.sh
 
 ynh_script_progression --message="Loading installation settings..."
 
@@ -26,6 +26,9 @@ fileserver_port=$(ynh_app_setting_get --app $app --key fileserver_port)
 webdav_port=$(ynh_app_setting_get --app $app --key webdav_port)
 final_path=$(ynh_app_setting_get --app $app --key final_path)
 seafile_user=$app
+seafile_data=/home/yunohost.app/seafile-data
+# TODO User env variable in 4.1
+seafile_version=$(ynh_app_upstream_version)
 
 ynh_script_progression --message="Stoping services..."
 
@@ -33,19 +36,31 @@ ynh_script_progression --message="Stoping services..."
 if [ -e /etc/init.d/seafile-server ]
 then
     # Old init script support
-    systemctl stop seafile-server
-    systemctl disable seafile-server
+    systemctl stop seafile-server --quiet
+    systemctl disable seafile-server --quiet
     ynh_secure_remove --file=/etc/init.d/seafile-server
     yunohost service remove seafile-server
 else
     ynh_systemd_action --service_name seafile --action stop
     ynh_systemd_action --service_name seahub --action stop
 fi
-sleep 2
+sleep 5
 pkill -f seafile-controller || true
 pkill -f seaf-server || true
 pkill -f ccnet-server || true
 pkill -f seahub || true
+
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=30
+# Backup the current version of the app
+if [ "0$(ynh_app_setting_get --app=$app --key=disable_backup_before_upgrade)" -ne 1 ]
+then
+    ynh_backup_before_upgrade
+    ynh_clean_setup () {
+        # Clean installation remainings that are not handled by the remove script.
+        ynh_clean_check_starting
+        ynh_restore_upgradebackup
+    }
+fi
 
 #=================================================
 # MIGRATION FROM OLD VERSION
@@ -107,46 +122,55 @@ case $installed_version in
 ;&
 "4.1."* )
 	# Update seafile by script
+	install_source_7_0
 	expect_scripts/upgrade_4.2.1.exp $final_path/seafile-server-$seafile_version
 ;&
 "4.3."* )
 	# Update seafile by script
+	install_source_7_0
 	expect_scripts/upgrade_4.4.3.exp $final_path/seafile-server-$seafile_version
 ;&
 "4.4."* )
 	# Update seafile by script
+	install_source_7_0
 	expect_scripts/upgrade_5.0.3.exp $final_path/seafile-server-$seafile_version
 ;&
 "5.0."* )
 	# Update seafile by script
+	install_source_7_0
 	expect_scripts/upgrade_5.1.exp $final_path/seafile-server-$seafile_version
 ;&
 "5.1."* )
 	# Update seafile by script
+	install_source_7_0
 	expect_scripts/upgrade_6.0.exp $final_path/seafile-server-$seafile_version
 ;&
 "6.0."* )
+    install_source_7_0
 	python3 ../conf/update_sso_conf.py || true
-	
+
 	# Update seafile by script
 	expect_scripts/upgrade_6.1.exp $final_path/seafile-server-$seafile_version
-	
+
 	# Enable manually wiki
 	echo 'ENABLE_WIKI = True' | tee -a $final_path/conf/seahub_settings.py
 ;&
 "6.1."* )
 	# Update seafile by script
+	install_source_7_0
 	expect_scripts/upgrade_6.2.exp $final_path/seafile-server-$seafile_version
 ;&
 "6.2."* )
 	# Update seafile by script
+	install_source_7_0
 	expect_scripts/upgrade_6.3.exp $final_path/seafile-server-$seafile_version
-	
+
 	# Update logrotate to have the last version
 	ynh_use_logrotate --logfile $final_path/logs --nonappend
 ;&
 "6.3."* )
 	# Update seafile by script
+	install_source_7_0
 	expect_scripts/upgrade_7.0.exp $final_path/seafile-server-$seafile_version
 	# SSO authentication
     echo 'ENABLE_REMOTE_USER_AUTHENTICATION = True' | tee -a $final_path/conf/seahub_settings.py
@@ -156,8 +180,33 @@ case $installed_version in
 
     # Clean connexion from the SSO. If we don't do this we could have some when the user was loged by the old SSO auth mecanisme
     ynh_mysql_execute_as_root --sql "DELETE FROM \`django_session\`" --database seahubdb
-    
+
     ynh_print_warn --message "To be able to continue to use the SSO you probybly need to migrate your account. You can use the command 'yunohost app action run seafile migrate_user_email_to_mail_email' to migrate all of theses account. Note that after this migratation you need to reconfigure all your client with the official email of the user."
+    ynh_secure_remove --file="$final_path/seafile-server-7.0.5"
+;&
+"7.0"* )
+    # Fix file comment
+    $final_path/seafile-server-$seafile_version/seahub.sh python-env seahub/manage.py migrate_file_comment
+
+    # Enable memcached
+    cat >> $final_path/conf/seahub_settings.py <<EOF
+CACHES = {
+    'default': {
+        'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+        'LOCATION': '127.0.0.1:11211',
+    },
+}
+EOF
+
+    # Update seafile by script
+    expect_scripts/upgrade_7.1.exp $final_path/seafile-server-$seafile_version
+
+    # Fix seafile data link. Look like that the upgrade script of seafile don't always work correctly
+    if [ -e $final_path/seafile-data ]; then
+        old_data_dir_path="$final_path/seafile_data$(date '+%Y%m%d.%H%M%S')"
+        mv "$final_path/seafile-data" "$old_data_dir_path"
+    fi
+    ln -s $seafile_data $final_path/seafile-data
 ;&
 esac
 
@@ -203,7 +252,7 @@ fi
 ynh_replace_string --match_string en_US.UTF-8 --replace_string ${LANG:-'en_US.UTF-8'} --target_file $final_path/seafile-server-$seafile_version/seahub.sh
 
 # Update gunicorn config
-sed --in-place -r "s@bind = \"0\.0\.0\.0:[[:digit:]]+\"@bind = \"0.0.0.0:$seahub_port\"@g" $final_path/conf/gunicorn.conf
+sed --in-place -r "s@bind = \"0\.0\.0\.0:[[:digit:]]+\"@bind = \"0.0.0.0:$seahub_port\"@g" $final_path/conf/gunicorn.conf.py
 
 # In the 3.x seafile version package the seahub_port and fileserver_port wasn't saved in the settings. If the settings is empty we try to get it and save in the settings
 

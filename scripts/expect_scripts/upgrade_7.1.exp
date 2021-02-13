@@ -1,0 +1,11 @@
+#!/usr/bin/expect
+set timeout 5
+
+set seafile_dir [lindex $argv 0]
+
+spawn $seafile_dir/upgrade/upgrade_7.0_7.1.sh
+
+expect "to contiune"
+send "\r";
+
+interact

@@ -4,21 +4,21 @@
 # GENERIC START
 #=================================================
 
+# Import common cmd
+source ./experimental_helper.sh
+source ./_common.sh
+
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
 
 # Stop script if errors
 ynh_abort_if_errors
 
-# Import common cmd
-source ./experimental_helper.sh
-source ./_common.sh
-
 ynh_script_progression --message="Validating installation parameters..."
 
 # Retrieve arguments
 domain=$YNH_APP_ARG_DOMAIN
-path_url=$(ynh_normalize_url_path --path_url $YNH_APP_ARG_PATH)
+path_url=$YNH_APP_ARG_PATH
 server_name="$YNH_APP_ARG_SERVER_NAME"
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
@@ -26,6 +26,8 @@ seafile_data=/home/yunohost.app/seafile-data
 final_path=/opt/yunohost/$app
 seafile_user=$app
 admin_password=$YNH_APP_ARG_ADMIN_PASSWORD
+# TODO User env variable in 4.1
+seafile_version=$(ynh_app_upstream_version)
 
 # Create special path with / at the end
 if [[ $path_url == '/' ]]
@@ -76,7 +78,8 @@ ynh_script_progression --message="Creating base directory..."
 mkdir -p $final_path
 mkdir -p $final_path/installed
 mkdir -p $final_path/logs
-mkdir -p $final_path/seafile-data
+mkdir -p $seafile_data
+ln -s $seafile_data $final_path/seafile-data
 
 # Create User
 ynh_script_progression --message="Configuring system user..."
@@ -85,10 +88,6 @@ ynh_system_user_create --username $seafile_user --home_dir $final_path
 # Check dependencies
 ynh_script_progression --message="Installing dependencies..." --weight=7
 install_dependance
-
-# Clean data directory
-ynh_script_progression --message="Cleaning data directory..."
-test -e $seafile_data && ynh_secure_remove --file="$seafile_data"
 
 # Download new version from sources
 ynh_script_progression --message="Installing sources files..." --weight=7
@@ -148,11 +147,28 @@ echo 'FILTER = &(objectClass=posixAccount)(permission=cn='$app'.main,ou=permissi
 # Enable manually wiki
 echo 'ENABLE_WIKI = True' | tee -a $final_path/conf/seahub_settings.py
 
+# Enable memcached
+cat >> $final_path/conf/seahub_settings.py <<EOF
+CACHES = {
+    'default': {
+        'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+        'LOCATION': '127.0.0.1:11211',
+    },
+}
+EOF
+
+# Configure admin info
+# It will be used the first start
+admin_email=$(ynh_user_get_info --username $admin --key 'mail')
+cp ../conf/create_admin.json $final_path/conf/admin.txt
+ynh_replace_string         --match_string __ADMIN__ --replace_string $admin_email --target_file $final_path/conf/admin.txt
+ynh_replace_special_string --match_string __PASSWORD__ --replace_string $admin_password --target_file $final_path/conf/admin.txt
+
 # Fix local warning
 ynh_replace_string --match_string en_US.UTF-8 --replace_string ${LANG:-'en_US.UTF-8'} --target_file $final_path/seafile-server-$seafile_version/seahub.sh
 
 # Update gunicorn config
-sed --in-place -r "s@bind = \"127\.0\.0\.1:[[:digit:]]+\"@bind = \"127.0.0.1:$seahub_port\"@g" $final_path/conf/gunicorn.conf
+sed --in-place -r "s@bind = \"127\.0\.0\.1:[[:digit:]]+\"@bind = \"127.0.0.1:$seahub_port\"@g" $final_path/conf/gunicorn.conf.py
 
 # Add webdav
 cp ../conf/seafdav.conf $final_path/conf/seafdav.conf
@@ -172,21 +188,12 @@ cp expect_scripts/first_launch.exp $final_path
 chmod +x $final_path/first_launch.exp
 
 # Set permissions to seafile directory
-chown -R $seafile_user:$seafile_user $final_path
-chown -R $seafile_user:$seafile_user $seafile_data
+set_permission
 
 # Sometime we have a current effect. We try to lunch seafile when not all permissions are already set.
 # So wait untils all permissions are cleanly set
 sleep 5
 ynh_debug_exec ls /opt/yunohost/seafile/ccnet
-
-# Start seafile, seahub and populate admin account
-su - $seafile_user -s /bin/bash -c "$final_path/seafile-server-$seafile_version/seafile.sh start"
-# We escape all char witch needed.
-ynh_replace_special_string --match_string __ADMIN_PASSWORD__ --replace_string "$admin_password" --target_file $final_path/first_launch.exp
-admin_email=$(ynh_user_get_info --username $admin --key 'mail')
-su - $seafile_user -s /bin/bash -c "$final_path/first_launch.exp $final_path/seafile-server-$seafile_version $admin_email"
-ynh_secure_remove --file="$final_path/first_launch.exp"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -213,29 +220,20 @@ ynh_script_progression --message="Configuring log rotation..."
 ynh_use_logrotate --logfile $final_path/logs
 ln -s $final_path/logs /var/log/seafile
 
-# Add fail2ban
-ynh_script_progression --message="Configuring fail2ban..." --weight=10
-ynh_add_fail2ban_config --use_template --others_var 'final_path'
-
 # register yunohost service
 yunohost service add seafile
 yunohost service add seahub
 
 ynh_script_progression --message="Stoping services..." --weight=3
 
-# Kill all services launched for initialisation
-su - $seafile_user -s /bin/bash -c "$final_path/seafile-server-latest/seafile.sh stop"
-su - $seafile_user -s /bin/bash -c "$final_path/seafile-server-latest/seahub.sh stop"
-sleep 2
-
-# We kill all process lunched by the script
-pkill -f seafile-controller || true
-pkill -f seaf-server || true
-
 # Start service
 ynh_script_progression --message="Starting seafile services..." --weight=3
 ynh_systemd_action --service_name seafile -l "spawned seaf-server, pid " -p /var/log/seafile/controller.log
 ynh_systemd_action --service_name seahub -l "Started Seafile hub." -p "systemd"
 sleep 2
+
+# Add fail2ban
+ynh_script_progression --message="Configuring fail2ban..." --weight=10
+ynh_add_fail2ban_config --use_template --others_var 'final_path'
 
 ynh_script_progression --message="Installation of $app completed" --last

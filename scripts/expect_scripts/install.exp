@@ -19,8 +19,8 @@ send "$server_name\r";
 expect "What is the ip or domain of the server?"
 send "$domain\r";
 
-expect "Where do you want to put your seafile data?"
-send "$seafile_data\r";
+# expect "Where do you want to put your seafile data?"
+# send "$seafile_data\r";
 
 expect "Which port do you want to use for the seafile fileserver?"
 send "$fileserver_port\r";
