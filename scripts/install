@@ -40,6 +40,11 @@ ynh_webpath_register --app $app --domain $domain --path_url $path_url
 
 # Check Final Path availability
 test ! -e "$final_path" || ynh_die --message "This path already contains a folder"
+if [ -e "$seafile_data" ]; then
+    old_data_dir_path="$seafile_data$(date '+%Y%m%d.%H%M%S')"
+    ynh_print_warn "A data directory already exist. Data was renamed to $old_data_dir_path"
+    mv "$seafile_data" "$old_data_dir_path"
+fi
 
 # Find available ports
 ynh_script_progression --message="Finding available ports..."
@@ -102,6 +107,8 @@ ynh_script_progression --message="Configuring application..." --weight=3
 chmod +x expect_scripts/install.exp
 chmod +x $final_path/seafile-server-$seafile_version/setup-seafile-mysql.sh
 expect_scripts/install.exp "$final_path/seafile-server-$seafile_version" "$server_name" "$domain" "$seafile_data" "$fileserver_port" "$db_pwd"
+
+sleep 3
 
 # Update seafile config
 ynh_replace_string --match_string http:// --replace_string https://  --target_file $final_path/conf/ccnet.conf

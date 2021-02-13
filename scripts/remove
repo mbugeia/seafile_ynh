@@ -40,8 +40,6 @@ ynh_secure_remove --file=/var/log/seafile
 ynh_script_progression --message="Removing code..."
 ynh_secure_remove --file=/var/www/$app
 ynh_secure_remove --file=/opt/yunohost/$app
-ynh_script_progression --message="Removing user data..."
-ynh_secure_remove --file=/home/yunohost.app/seafile-data
 ynh_secure_remove --file=/tmp/seahub_cache
 
 # Remove databases
@@ -78,4 +76,7 @@ ynh_script_progression --message="Removing seafile service..."
 yunohost service remove seafile
 yunohost service remove seahub
 
+ynh_print_info --message="Due of the backup core only feature the data directory in '/home/yunohost.app/seafile-data' was not removed. It need to be removed manually to purge app user data."
+
 ynh_script_progression --message="Removal of $app completed" --last
+sleep 1

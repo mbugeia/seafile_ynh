@@ -72,10 +72,10 @@ if [ $final_path == "/var/www/$app" ]; then
     ynh_app_setting_set --app $app --key final_path --value $final_path
     test -e /var/log/seafile && rm /var/log/$app
     if ! [ -z "$(ls -A $final_path/seafile_data)" ]; then
-        # Data directory empty, so considere that all data are already in /home/yunohost.app/seafile
-        mv /opt/yunohost/$app/seafile-data/* /home/yunohost.app/seafile-data/
+        # Data directory NOT empty, transfer data to /home/yunohost.app/seafile
+        mv $final_path/seafile_data/* /home/yunohost.app/seafile-data/
         ynh_secure_remove $final_path/seafile_data
-        ln -s $seafile_data $final_path/seafile_data
+        ln -s /home/yunohost.app/seafile-data $final_path/
     fi
     ln -s $final_path/logs /var/log/seafile
     set_permission

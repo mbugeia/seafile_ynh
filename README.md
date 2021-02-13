@@ -1,8 +1,8 @@
-Seafile For yunohost
+Seafile for YunoHost
 =================
 
-[![Integration level](https://dash.yunohost.org/integration/seafile.svg)](https://ci-apps.yunohost.org/ci/apps/seafile%20%28Community%29/lastBuild/consoleFull)  
-[![Install seafile with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=seafile)
+[![Integration level](https://dash.yunohost.org/integration/seafile.svg)](https://dash.yunohost.org/appci/app/seafile) ![](https://ci-apps.yunohost.org/ci/badges/seafile.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/seafile.maintain.svg)  
+[![Install seafile with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=seafile)
 
 > *This package allow you to install seafile quickly and simply on a YunoHost server.  
 If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
@@ -59,11 +59,10 @@ for more information.
 
 Since seafile 6.3 the i386 architecture is no more supported.
 
-Seafile no longer distribute binary for generic armhf architectures but rpi binary could work.
+Seafile don't distribute binary for generic armhf architectures but rpi binary generally work on all arm board.
 
-* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/seafile%20(Community).svg)](https://ci-apps.yunohost.org/ci/apps/seafile/)
-* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/seafile%20(Community).svg)](https://ci-apps-arm.yunohost.org/ci/apps/seafile/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/jenkins/job/seafile%20(Community).svg)](https://ci-stretch.nohost.me/jenkins/job/seafile/)
+* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/seafile%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/seafile/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/seafile%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/seafile/)
 
 <!--Limitations
 ------------
@@ -73,14 +72,7 @@ Seafile no longer distribute binary for generic armhf architectures but rpi bina
 Additional informations
 -----------------------
 
-### Change URL
-
-Since now it's possible to change domain or the url of seafile.
-
-To do this run : `yunohost app change-url seafile -d new_domain.tld -p PATH new_path`
-
-Links
------
+### Links
 
  * Report a bug: https://github.com/YunoHost-Apps/seafile_ynh/issues
  * App website: https://www.seafile.com
@@ -88,19 +80,44 @@ Links
 
 ---
 
-Install
--------
+### Install
 
 From command line:
 
-`sudo yunohost app install -l seafile https://github.com/YunoHost-Apps/seafile_ynh`
+`yunohost app install seafile`
 
-Upgrade
--------
+### Upgrade
 
 From command line:
 
-`sudo yunohost app upgrade seafile -u https://github.com/YunoHost-Apps/seafile_ynh`
+`yunohost app upgrade seafile`
+
+### Backup
+
+This app use now the core-only feature of the backup. To keep the integrity of the data and to have a better guarantee of the restoration is recommended to proceed like this:
+
+- Stop seafile service with theses following command:
+
+`systemctl stop seafile.service seahub.service`
+
+- Launch the backup of seafile with this following command:
+
+`yunohost backup create --app seafile`
+
+- Do a backup of your data with your specific strategy (could be with rsync, borg backup or just cp). The data is stored in `/home/yunohost.app/seafile-data`.
+- Restart the seafile service with theses command:
+
+`systemctl start seafile.service seahub.service`
+
+### Remove
+
+Due of the backup core only feature the data directory in `/home/yunohost.app/seafile-data` **is not removed**. It need to be removed manually to purge app user data.
+
+### Change URL
+
+Since now it's possible to change domain or the url of seafile.
+
+To do this run : `yunohost app change-url seafile -d new_domain.tld -p PATH new_path`
 
 Developers infos
 ----------------
