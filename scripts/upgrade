@@ -4,27 +4,35 @@
 # GENERIC START
 #=================================================
 
+# Import common cmd
+source ./experimental_helper.sh
+source ./_common.sh
+
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
 
 # Stop script if errors
 ynh_abort_if_errors
 
-# Import common cmd
-source ./experimental_helper.sh
-source ./_common.sh
-
 ynh_script_progression --message="Loading installation settings..."
 
 # Retrieve arguments
 domain=$(ynh_app_setting_get --app $app --key domain)
 path_url=$(ynh_normalize_url_path --path_url $(ynh_app_setting_get --app $app --key path))
-installed_version=$(ynh_app_setting_get --app $app --key installed_version)
 seahub_port=$(ynh_app_setting_get --app $app --key seahub_port)
 fileserver_port=$(ynh_app_setting_get --app $app --key fileserver_port)
 webdav_port=$(ynh_app_setting_get --app $app --key webdav_port)
 final_path=$(ynh_app_setting_get --app $app --key final_path)
 seafile_user=$app
+seafile_data=/home/yunohost.app/seafile-data
+installed_version=${YNH_APP_CURRENT_VERSION/~ynh*/}
+seafile_version=$(ynh_app_upstream_version)
+architecture=$(ynh_detect_arch)
+
+if [ "$YNH_APP_CURRENT_VERSION" == '-' ]; then
+    YNH_APP_CURRENT_VERSION="6.0.9~ynh0"
+    installed_version=${YNH_APP_CURRENT_VERSION/~ynh*/}
+fi
 
 ynh_script_progression --message="Stoping services..."
 
@@ -32,19 +40,32 @@ ynh_script_progression --message="Stoping services..."
 if [ -e /etc/init.d/seafile-server ]
 then
     # Old init script support
-    systemctl stop seafile-server
-    systemctl disable seafile-server
+    systemctl stop seafile-server --quiet
+    systemctl disable seafile-server --quiet
     ynh_secure_remove --file=/etc/init.d/seafile-server
     yunohost service remove seafile-server
 else
     ynh_systemd_action --service_name seafile --action stop
     ynh_systemd_action --service_name seahub --action stop
 fi
-sleep 2
+sleep 5
 pkill -f seafile-controller || true
 pkill -f seaf-server || true
 pkill -f ccnet-server || true
 pkill -f seahub || true
+
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=30
+# Backup the current version of the app
+if [ "0$(ynh_app_setting_get --app=$app --key=disable_backup_before_upgrade)" -ne 1 ] \
+    && (ynh_compare_current_package_version --comparison=ge --version='7.0.5~ynh1')
+then
+    ynh_backup_before_upgrade
+    ynh_clean_setup () {
+        # Clean installation remainings that are not handled by the remove script.
+        ynh_clean_check_starting
+        ynh_restore_upgradebackup
+    }
+fi
 
 #=================================================
 # MIGRATION FROM OLD VERSION
@@ -93,10 +114,10 @@ install_dependance
 ynh_script_progression --message="Configuring application..."
 
 # permission to execute update script and expect helper
-chmod +x expect_scripts/upgrade_*.exp
-chmod +x expect_scripts/minor-upgrade.exp
-chmod +x $final_path/seafile-server-$seafile_version/upgrade/upgrade_*.sh
-chmod +x $final_path/seafile-server-$seafile_version/upgrade/minor-upgrade.sh
+mv_expect_scripts
+set_permission
+chmod u+x,o= $final_path/seafile-server-$seafile_version/upgrade/upgrade_*.sh
+chmod u+x,o= $final_path/seafile-server-$seafile_version/upgrade/minor-upgrade.sh
 
 # do the upgrade    ( the ";&" syntax mean when it go in the first case which is true it do all the next case)
 case $installed_version in
@@ -106,47 +127,55 @@ case $installed_version in
 ;&
 "4.1."* )
 	# Update seafile by script
-	expect_scripts/upgrade_4.2.1.exp $final_path/seafile-server-$seafile_version
+	install_source_7_0
+	$expect_scripts_dir/upgrade_4.2.1.exp $final_path/seafile-server-7.0.5
 ;&
 "4.3."* )
 	# Update seafile by script
-	expect_scripts/upgrade_4.4.3.exp $final_path/seafile-server-$seafile_version
+	install_source_7_0
+	$expect_scripts_dir/upgrade_4.4.3.exp $final_path/seafile-server-7.0.5
 ;&
 "4.4."* )
 	# Update seafile by script
-	expect_scripts/upgrade_5.0.3.exp $final_path/seafile-server-$seafile_version
+	install_source_7_0
+	$expect_scripts_dir/upgrade_5.0.3.exp $final_path/seafile-server-7.0.5
 ;&
 "5.0."* )
 	# Update seafile by script
-	expect_scripts/upgrade_5.1.exp $final_path/seafile-server-$seafile_version
+	install_source_7_0
+	$expect_scripts_dir/upgrade_5.1.exp $final_path/seafile-server-7.0.5
 ;&
 "5.1."* )
 	# Update seafile by script
-	expect_scripts/upgrade_6.0.exp $final_path/seafile-server-$seafile_version
+	install_source_7_0
+	$expect_scripts_dir/upgrade_6.0.exp $final_path/seafile-server-7.0.5
 ;&
 "6.0."* )
-	python3 ../conf/update_sso_conf.py || true
-	
+    install_source_7_0
+
 	# Update seafile by script
-	expect_scripts/upgrade_6.1.exp $final_path/seafile-server-$seafile_version
-	
+	$expect_scripts_dir/upgrade_6.1.exp $final_path/seafile-server-7.0.5
+
 	# Enable manually wiki
 	echo 'ENABLE_WIKI = True' | tee -a $final_path/conf/seahub_settings.py
 ;&
 "6.1."* )
 	# Update seafile by script
-	expect_scripts/upgrade_6.2.exp $final_path/seafile-server-$seafile_version
+	install_source_7_0
+	$expect_scripts_dir/upgrade_6.2.exp $final_path/seafile-server-7.0.5
 ;&
 "6.2."* )
 	# Update seafile by script
-	expect_scripts/upgrade_6.3.exp $final_path/seafile-server-$seafile_version
-	
+	install_source_7_0
+	$expect_scripts_dir/upgrade_6.3.exp $final_path/seafile-server-7.0.5
+
 	# Update logrotate to have the last version
 	ynh_use_logrotate --logfile $final_path/logs --nonappend
 ;&
 "6.3."* )
 	# Update seafile by script
-	expect_scripts/upgrade_7.0.exp $final_path/seafile-server-$seafile_version
+	install_source_7_0
+	$expect_scripts_dir/upgrade_7.0.exp $final_path/seafile-server-7.0.5
 	# SSO authentication
     echo 'ENABLE_REMOTE_USER_AUTHENTICATION = True' | tee -a $final_path/conf/seahub_settings.py
     echo "REMOTE_USER_HEADER = 'HTTP_EMAIL'" | tee -a $final_path/conf/seahub_settings.py
@@ -155,12 +184,43 @@ case $installed_version in
 
     # Clean connexion from the SSO. If we don't do this we could have some when the user was loged by the old SSO auth mecanisme
     ynh_mysql_execute_as_root --sql "DELETE FROM \`django_session\`" --database seahubdb
-    
+
     ynh_print_warn --message "To be able to continue to use the SSO you probybly need to migrate your account. You can use the command 'yunohost app action run seafile migrate_user_email_to_mail_email' to migrate all of theses account. Note that after this migratation you need to reconfigure all your client with the official email of the user."
+;&
+"7.0"* )
+    # Fix file comment
+    pushd $final_path/seafile-server-$seafile_version
+    sudo -u $seafile_user $final_path/seafile-server-$seafile_version/seahub.sh python-env python3 seahub/manage.py migrate_file_comment
+    popd
+
+    # Update seafile by script
+    sudo -u $seafile_user $expect_scripts_dir/upgrade_7.1.exp $final_path/seafile-server-$seafile_version
+
+    ynh_secure_remove --file="$final_path/seafile-server-7.0.5"
+
+    # Enable memcached
+    cat >> $final_path/conf/seahub_settings.py <<EOF
+CACHES = {
+    'default': {
+        'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+        'LOCATION': '127.0.0.1:11211',
+    },
+}
+EOF
+    # Fix seafile data link. Look like that the upgrade script of seafile don't always work correctly
+    if [ -e $final_path/seafile-data ]; then
+        old_data_dir_path="$final_path/seafile_data$(date '+%Y%m%d.%H%M%S')"
+        mv "$final_path/seafile-data" "$old_data_dir_path"
+    fi
+    ln -s $seafile_data $final_path/seafile-data
+;&
+"7.1."* )
+	sudo -u $seafile_user $expect_scripts_dir/upgrade_8.0.exp $final_path/seafile-server-$seafile_version
+	echo "FILTER = permission=cn=$app.main,ou=permission,dc=yunohost,dc=org" | tee -a $final_path/conf/ccnet.conf
 ;&
 esac
 
-expect_scripts/minor-upgrade.exp $final_path/seafile-server-$seafile_version
+sudo -u $seafile_user $expect_scripts_dir/minor-upgrade.exp $final_path/seafile-server-$seafile_version
 
 ## Install webdav and logrotate if not installed
 if [[ $installed_version = "4.0."* ]] || [[ $installed_version = "4.1."* ]]
@@ -178,9 +238,6 @@ then
 	# Add webdav config
 	cp ../conf/seafdav.conf $final_path/conf/seafdav.conf
 	ynh_replace_string --match_string __WEBDAV_PORT__ --replace_string $webdav_port --target_file $final_path/conf/seafdav.conf
-	
-	# Add sso config to unprotect domain.tld/seafdav in /etc/ssowat/conf.json.persistent
-	python3 ../conf/add_sso_conf_webdav.py
 	
 	# Update seafile config
 	echo 'COMPRESS_URL = MEDIA_URL' | tee -a $final_path/conf/seahub_settings.py
@@ -202,7 +259,7 @@ fi
 ynh_replace_string --match_string en_US.UTF-8 --replace_string ${LANG:-'en_US.UTF-8'} --target_file $final_path/seafile-server-$seafile_version/seahub.sh
 
 # Update gunicorn config
-sed --in-place -r "s@bind = \"0\.0\.0\.0:[[:digit:]]+\"@bind = \"0.0.0.0:$seahub_port\"@g" $final_path/conf/gunicorn.conf
+sed --in-place -r "s@bind = \"0\.0\.0\.0:[[:digit:]]+\"@bind = \"0.0.0.0:$seahub_port\"@g" $final_path/conf/gunicorn.conf.py
 
 # In the 3.x seafile version package the seahub_port and fileserver_port wasn't saved in the settings. If the settings is empty we try to get it and save in the settings
 
@@ -243,6 +300,26 @@ ynh_use_logrotate --logfile $final_path/logs --nonappend
 ynh_script_progression --message="Configuring fail2ban..." --weight=10
 ynh_add_fail2ban_config --use_template --others_var 'final_path'
 
+ynh_script_progression --message="Configuring permissions..." --weight=1
+ynh_legacy_permissions_delete_all
+if ! ynh_permission_exists --permission=file_server; then
+    ynh_permission_create --permission=file_server --url=$domain/seafhttp --auth_header=false \
+                          --label="File server" --protected=true --allowed=visitors
+    ynh_permission_create --permission=webdav --url=$domain/seafdav --auth_header=true \
+                          --label="Webdav" --protected=true --allowed=visitors
+    ynh_permission_create --permission=media --url=/media --auth_header=true \
+                          --label="Media" --protected=true --allowed=visitors
+    python3 remove_sso_conf_persistent.py $domain \
+        || ynh_print_warn --message="Your file /etc/ssowat/""conf.json.persistent doesn't respect the json syntax. The config file wasn't cleaned. Please clean it manually."
+else
+    ynh_permission_url --permission=file_server --url=$domain/seafhttp --auth_header=false
+    ynh_permission_update --permission=file_server --label="File server" --show_tile=false --protected=true
+    ynh_permission_url --permission=webdav --url=$domain/seafdav --auth_header=false
+    ynh_permission_update --permission=webdav --label="Webdav" --show_tile=false --protected=true
+    ynh_permission_url --permission=media --url=/media --auth_header=true
+    ynh_permission_update --permission=media --label="Media" --show_tile=false --protected=true
+fi
+
 # register yunohost service
 ynh_script_progression --message="Register seafile service..."
 yunohost service add seafile
@@ -265,8 +342,5 @@ while read f
 do
     ynh_secure_remove --file=$final_path/$f
 done
-
-# store new installed version
-ynh_app_setting_set --app $app --key installed_version --value $seafile_version
 
 ynh_script_progression --message="Upgrade of $app completed" --last

@@ -4,25 +4,26 @@
 # GENERIC START
 #=================================================
 
+# Import common cmd
+source ../settings/scripts/experimental_helper.sh
+source ../settings/scripts/_common.sh
+
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
 
 # Stop script if errors
 ynh_abort_if_errors
 
-# Import common cmd
-source ../settings/scripts/experimental_helper.sh
-source ../settings/scripts/_common.sh
-
-ynh_script_progression --message="Loading installation settings..."
+ynh_print_info --message="Loading installation settings..."
 
 # retrieve useful param
 domain=$(ynh_app_setting_get --app $app --key domain)
 db_pwd=$(ynh_app_setting_get --app $app --key mysqlpwd)
 final_path=$(ynh_app_setting_get --app $app --key final_path)
+seafile_version=$(ynh_app_upstream_version)
 seafile_user=$app
 
-if [[ ! "$(systemctl status seafile)" =~ "Active: inactive (dead)" ]] || [[ ! "$(systemctl status seahub)" =~ "Active: inactive (dead)" ]]; then
+if [[ ! "$(systemctl status seafile)" =~ "Active: inactive (dead)" ]] || [[ ! "$(systemctl status seahub)" =~ "Active: failed (Result: signal)" ]]; then
     ynh_print_warn --message="It's hightly recommended to make your backup when the service is stopped. Please stop seafile service and seahub service with this command before to run the backup 'systemctl stop seafile.service seahub.service'"
 fi
 
@@ -31,11 +32,11 @@ fi
 #=================================================
 
 # # Backup app files
-ynh_script_progression --message="Backing up code..." --weight=3
+ynh_print_info --message="Backing up code..."
 ynh_backup --src_path $final_path
-ynh_script_progression --message="Backing up user data..." --weight=10
+ynh_print_info --message="Backing up user data..."
 ynh_backup --src_path=/home/yunohost.app/seafile-data --dest_path="data" --is_big=1
-ynh_script_progression --message="Backing up configuration..."
+ynh_print_info --message="Backing up configuration..."
 ynh_backup --src_path /etc/nginx/conf.d/$domain.d/${app}.conf
 ynh_backup --src_path /etc/systemd/system/seafile.service
 ynh_backup --src_path /etc/systemd/system/seahub.service
@@ -43,9 +44,9 @@ ynh_backup --src_path /etc/fail2ban/jail.d/$app.conf
 ynh_backup --src_path /etc/fail2ban/filter.d/$app.conf
 
 # Backup mysql
-ynh_script_progression --message="Backing up database"
+ynh_print_info --message="Backing up database"
 ynh_mysql_dump_db --database ccnetdb > ${YNH_CWD}/ccnetdb.dmp
 ynh_mysql_dump_db --database seafiledb > ${YNH_CWD}/seafiledb.dmp
 ynh_mysql_dump_db --database seahubdb > ${YNH_CWD}/seahubdb.dmp
 
-ynh_script_progression --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)." --last
+ynh_print_info --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."

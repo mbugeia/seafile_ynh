@@ -4,9 +4,8 @@ set timeout 10
 set seafile_dir [lindex $argv 0]
 set server_name [lindex $argv 1]
 set domain [lindex $argv 2]
-set seafile_data [lindex $argv 3]
-set fileserver_port [lindex $argv 4]
-set db_pwd [lindex $argv 5]
+set fileserver_port [lindex $argv 3]
+set db_pwd [lindex $argv 4]
 
 spawn $seafile_dir/setup-seafile-mysql.sh
 
@@ -18,9 +17,6 @@ send "$server_name\r";
 
 expect "What is the ip or domain of the server?"
 send "$domain\r";
-
-expect "Where do you want to put your seafile data?"
-send "$seafile_data\r";
 
 expect "Which port do you want to use for the seafile fileserver?"
 send "$fileserver_port\r";

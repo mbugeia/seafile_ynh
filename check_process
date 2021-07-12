@@ -19,7 +19,7 @@
 		    upgrade=1
             upgrade=1    from_commit=db11d890922564dfdcb7937a3a682957082fbb31
             upgrade=1    from_commit=67e0869de25f4f58710c3d30d5533356745ea676
-            upgrade=1    from_commit=637a32aa57bc2dc6421e0e79d52862f0924be1cf
+            upgrade=1    from_commit=6786d9f65e60b2d2a96b9ea4c43897dde3a66199
 		    backup_restore=1
 		    multi_instance=0
 		    wrong_user=1
@@ -30,23 +30,11 @@
 		    port_already_use=1	(8000)
 		    final_path_already_use=1
 		    change_url=1
-;;; Levels
-    Level 1=auto
-  	Level 2=auto
-  	Level 3=auto
-  	# https://github.com/YunoHost-Apps/seafile_ynh/issues/1
-  	Level 4=1
-  	Level 5=auto
-  	Level 6=auto
-  	Level 7=auto
-  	Level 8=0
-  	Level 9=0
-  	Level 10=0
 
 ;;; Upgrade options
     ; commit=db11d890922564dfdcb7937a3a682957082fbb31
         name=Version 6.3.4 - branch Old_version_for_CI_3
 	; commit=67e0869de25f4f58710c3d30d5533356745ea676
 		name=Before move main dir to opt - branch Old_version_for_CI_2
-	; commit=637a32aa57bc2dc6421e0e79d52862f0924be1cf
+	; commit=6786d9f65e60b2d2a96b9ea4c43897dde3a66199
 		name=The oldest installable version - branch Old_version_for_CI

@@ -14,7 +14,7 @@ Seafile is an open Source Cloud Storage application.
 
 It's a Enterprise file sync and share platform with high reliability and performance. It's a file hosting platform with high reliability and performance. Put files on your own server. Sync and share files across different devices, or access all the files as a virtual disk.
 
-**Shipped version:** 7.0.4
+**Shipped version:** 8.0.5
 
 Screenshots
 -----------
@@ -87,6 +87,14 @@ From command line:
 `yunohost app install seafile`
 
 ### Upgrade
+
+By default a backup is made before the upgrade. To avoid this you have theses following possibilites:
+- Pass the `NO_BACKUP_UPGRADE` env variable with `1` at each upgrade. By example `NO_BACKUP_UPGRADE=1 yunohost app upgrade synapse`.
+- Set the settings `disable_backup_before_upgrade` to `1`. You can set this with this command:
+
+`yunohost app setting synapse disable_backup_before_upgrade -v 1`
+
+After this settings will be applied for **all** next upgrade.
 
 From command line:
 

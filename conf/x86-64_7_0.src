@@ -1,5 +1,5 @@
-SOURCE_URL=https://s3.eu-central-1.amazonaws.com/download.seadrive.org/seafile-server_8.0.5_x86-64.tar.gz
-SOURCE_SUM=4065e877e9675afba958aa1007db0d3a53949f8987d7f9849dfa29a6a13a06bf
+SOURCE_URL=https://download.seadrive.org/seafile-server_7.0.5_x86-64.tar.gz
+SOURCE_SUM=7eb8814f1bc8ee78c80741fa08cbdce2b5ea8895a87730bde2a1b32d031e8f53
 # (Optional) Program to check the integrity (sha256sum, md5sum...)
 # default: sha256
 SOURCE_SUM_PRG=sha256sum

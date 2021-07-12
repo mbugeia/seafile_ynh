@@ -4,12 +4,12 @@
 # GENERIC START
 #=================================================
 
-# Source YunoHost helpers
-source /usr/share/yunohost/helpers
-
 # Import common cmd
 source ./experimental_helper.sh
 source ./_common.sh
+
+# Source YunoHost helpers
+source /usr/share/yunohost/helpers
 
 ynh_script_progression --message="Loading installation settings..."
 
@@ -31,10 +31,6 @@ pkill -f seafile-controller || true
 pkill -f seaf-server || true
 pkill -f ccnet-server || true
 pkill -f seahub || true
-
-# remove sso config to unprotect domain.tld/seafhttp in /etc/ssowat/conf.json.persistent
-ynh_script_progression --message="Cleaning SSO configuration..."
-python3 ../conf/remove_sso_conf.py
 
 ynh_script_progression --message="Removing logs..."
 ynh_secure_remove --file=/var/log/seafile

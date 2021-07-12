@@ -4,15 +4,15 @@
 # GENERIC START
 #=================================================
 
+# Import common cmd
+source scripts/experimental_helper.sh
+source scripts/_common.sh
+
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
 
 # Stop script if errors
 ynh_abort_if_errors
-
-# Import common cmd
-source scripts/experimental_helper.sh
-source scripts/_common.sh
 
 ynh_print_info --message="Loading installation settings..."
 

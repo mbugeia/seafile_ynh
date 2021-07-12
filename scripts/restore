@@ -4,15 +4,15 @@
 # GENERIC START
 #=================================================
 
+# Import common cmd
+source ../settings/scripts/experimental_helper.sh
+source ../settings/scripts/_common.sh
+
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
 
 # Stop script if errors
 ynh_abort_if_errors
-
-# Import common cmd
-source ../settings/scripts/experimental_helper.sh
-source ../settings/scripts/_common.sh
 
 ynh_script_progression --message="Loading settings..."
 
@@ -22,7 +22,9 @@ path_url=$(ynh_normalize_url_path --path_url $(ynh_app_setting_get --app $app --
 seafile_data=/home/yunohost.app/seafile-data
 db_pwd=$(ynh_app_setting_get --app $app --key mysqlpwd)
 final_path=$(ynh_app_setting_get --app $app --key final_path)
+seafile_version=$(ynh_app_upstream_version)
 seafile_user=$app
+architecture=$(ynh_detect_arch)
 
 # Check domain/path availability
 ynh_webpath_available --domain $domain --path_url $path_url || ynh_die --message "$domain/$path_url is not available, please use an other domain or path."
@@ -57,10 +59,6 @@ su -c "mysql -u ${app} -p$db_pwd seahubdb < ${YNH_CWD}/seahubdb.dmp"
 # GENERIC FINALIZATION
 #=================================================
 
-# Restore sso persistent config
-ynh_script_progression --message="Configuring permissions..."
-python3 ../settings/conf/add_sso_conf.py || ynh_die --message="Your file /etc/ssowat/conf.json.persistent doesn't respect the json syntax. Please fix the syntax to install this app."
-
 # Add logrotate
 ynh_script_progression --message="Configuring log rotation..."
 ynh_use_logrotate --logfile $final_path/logs
@@ -73,8 +71,8 @@ set_permission
 # Enable service and start seafile
 ynh_script_progression --message="Reconfiguring application..."
 systemctl daemon-reload
-systemctl enable seafile
-systemctl enable seahub
+systemctl enable seafile --quiet
+systemctl enable seahub --quiet
 
 # Add Seafile to YunoHost's monitored services
 ynh_script_progression --message="Register seafile service..."
